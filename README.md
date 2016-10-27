@@ -1,2 +1,2 @@
-# ICUText
+# ICUCS
 icu-project study/experiment
