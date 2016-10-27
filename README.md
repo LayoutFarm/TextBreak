@@ -1,2 +1,2 @@
-# ICU-CS
+# ICU.CS
 icu-project study/experiment
