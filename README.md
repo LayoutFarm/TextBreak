@@ -1,2 +1,2 @@
 # TextBreaker
-icu-project study/experiment
+TextBreaker in C#
