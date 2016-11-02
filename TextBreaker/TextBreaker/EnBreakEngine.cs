@@ -1,5 +1,4 @@
-﻿//MIT, 2016, WinterDev
-//some code from ICU project with BSD license
+﻿//MIT, 2016, WinterDev 
 
 namespace LayoutFarm.TextBreaker
 {
@@ -17,8 +16,10 @@ namespace LayoutFarm.TextBreaker
         BreakBounds breakBounds = new BreakBounds();
         public override void DoBreak(char[] input, int start, int len, OnBreak onbreak)
         {
+            //----------------------------------------
             //simple break word/ num/ punc / space
             //similar to lexer function            
+            //----------------------------------------
             LexState lexState = LexState.Init;
             int endBefore = start + len;
             for (int i = start; i < endBefore; ++i)
@@ -85,7 +86,7 @@ namespace LayoutFarm.TextBreaker
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
                                 breakBounds.kind = WorkKind.Punc;
-                                
+
                                 //we not collect punc
                                 onbreak(breakBounds);
                                 breakBounds.length = 0;
