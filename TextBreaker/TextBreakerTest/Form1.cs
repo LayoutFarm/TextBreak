@@ -30,11 +30,11 @@ namespace TextBreakerTest
 
 
             });
-        }
-
+        } 
         private void cmdReadDict_Click(object sender, EventArgs e)
         {
 
+            DictionaryData.LoadData("../../../icu57dt/brkitr/thaidict.dict");
         }
 
 

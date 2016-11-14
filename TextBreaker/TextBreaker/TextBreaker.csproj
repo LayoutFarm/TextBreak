@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="BreakEngine.cs" />
     <Compile Include="DictionaryBreakEngine.cs" />
+    <Compile Include="DictionaryData.cs" />
     <Compile Include="EnBreakEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
