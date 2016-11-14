@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
-
 using LayoutFarm.TextBreaker;
 
 namespace TextBreakerTest
@@ -31,5 +31,12 @@ namespace TextBreakerTest
 
             });
         }
+
+        private void cmdReadDict_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
     }
 }
