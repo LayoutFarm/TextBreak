@@ -141,6 +141,7 @@ namespace LayoutFarm.TextBreaker
                             {//must true
                             }
                             BytesDictionaryMatcher byteDicMatcher = new BytesDictionaryMatcher(data, transform);
+                            byteDicMatcher.Tx2('ก');
                             dicMatcher = byteDicMatcher;
                         } break;
                     case TRIE_TYPE_UCHARS:
@@ -202,34 +203,127 @@ namespace LayoutFarm.TextBreaker
 
     public struct BytesTrie
     {
-        byte[] _charBuffer;
-        int remainingMatchLength;
-        int rootPos;
-        int pos;
+        byte[] bytes_;
+        int remainingMatchLength_;
+        int root_;
+        int pos_;
         public BytesTrie(byte[] charBuffer, int offset)
         {
-            this._charBuffer = charBuffer;
-            this.pos = this.rootPos = offset;
-            this.remainingMatchLength = -1;
+            this.bytes_ = charBuffer;
+            this.pos_ = this.root_ = offset;
+            this.remainingMatchLength_ = -1;
         }
         public void Reset()
         {
-            this.pos = this.rootPos;
-            this.remainingMatchLength = -1;
+            this.pos_ = this.root_;
+            this.remainingMatchLength_ = -1;
         }
-        public Result First()
+        public Result First(int inByte)
         {
-            return Result.NO_VALUE;
-            //remainingMatchLength_ = -1;
-            //if (inByte < 0)
-            //{
-            //    inByte += 0x100;
-            //}
-            //return nextImpl(root_, inByte);
-            //return Result.NO_VALUE;
+
+            remainingMatchLength_ = -1;
+            if (inByte < 0)
+            {
+                inByte += 0x100;
+            }
+            return nextImpl(root_, inByte);
         }
 
+        // 10..1f: Linear-match node, match 1..16 bytes and continue reading the next node.
+        const int kMinLinearMatch = 0x10;/*package*/
+        const int kMaxLinearMatchLength = 0x10;/*package*/
+        // 20..ff: Variable-length value node.
+        // If odd, the value is final. (Otherwise, intermediate value or jump delta.)
+        // Then shift-right by 1 bit.
+        // The remaining lead byte value indicates the number of following bytes (0..4)
+        // and contains the value's top bits.
+        /*package*/
+        const int kMinValueLead = kMinLinearMatch + kMaxLinearMatchLength;  // 0x20
+        // It is a final value if bit 0 is set.
+        const int kValueIsFinal = 1;
 
+        // Compact value: After testing bit 0, shift right by 1 and then use the following thresholds.
+        /*package*/
+        const int kMinOneByteValueLead = kMinValueLead / 2;  // 0x10
+        /*package*/
+        const int kMaxOneByteValue = 0x40;  // At least 6 bits in the first byte.
+
+        /*package*/
+        const int kMinTwoByteValueLead = kMinOneByteValueLead + kMaxOneByteValue + 1;  // 0x51
+        /*package*/
+        const int kMaxTwoByteValue = 0x1aff;
+
+        /*package*/
+        const int kMinThreeByteValueLead = kMinTwoByteValueLead + (kMaxTwoByteValue >> 8) + 1;  // 0x6c
+        /*package*/
+        const int kFourByteValueLead = 0x7e;
+
+        // A little more than Unicode code points. (0x11ffff)
+        /*package*/
+        const int kMaxThreeByteValue = ((kFourByteValueLead - kMinThreeByteValueLead) << 16) - 1;
+
+        /*package*/
+        const int kFiveByteValueLead = 0x7f;
+
+        // Compact delta integers.
+        /*package*/
+        const int kMaxOneByteDelta = 0xbf;
+        /*package*/
+        const int kMinTwoByteDeltaLead = kMaxOneByteDelta + 1;  // 0xc0
+        /*package*/
+        const int kMinThreeByteDeltaLead = 0xf0;
+        /*package*/
+        const int kFourByteDeltaLead = 0xfe;
+        /*package*/
+        const int kFiveByteDeltaLead = 0xff;
+
+        /*package*/
+        const int kMaxTwoByteDelta = ((kMinThreeByteDeltaLead - kMinTwoByteDeltaLead) << 8) - 1;  // 0x2fff
+        /*package*/
+        const int kMaxThreeByteDelta = ((kFourByteDeltaLead - kMinThreeByteDeltaLead) << 16) - 1;  // 0xdffff
+        private Result nextImpl(int pos, int inByte)
+        {
+            throw new NotSupportedException();
+            //for (; ; )
+            //{
+            //    int node = bytes_[pos++] & 0xff;
+            //    if (node < kMinLinearMatch)
+            //    {
+            //        return branchNext(pos, node, inByte);
+            //    }
+            //    else if (node < kMinValueLead)
+            //    {
+            //        // Match the first of length+1 bytes.
+            //        int length = node - kMinLinearMatch;  // Actual match length minus 1.
+            //        if (inByte == (bytes_[pos++] & 0xff))
+            //        {
+            //            remainingMatchLength_ = --length;
+            //            pos_ = pos;
+            //            return (length < 0 && (node = bytes_[pos] & 0xff) >= kMinValueLead) ?
+            //                    valueResults_[node & kValueIsFinal] : Result.NO_VALUE;
+            //        }
+            //        else
+            //        {
+            //            // No match.
+            //            break;
+            //        }
+            //    }
+            //    else if ((node & kValueIsFinal) != 0)
+            //    {
+            //        // No further matching bytes.
+            //        break;
+            //    }
+            //    else
+            //    {
+            //        // Skip intermediate value.
+            //        pos = skipValue(pos, node);
+            //        // The next node must not also be a value node.
+            //        assert((bytes_[pos] & 0xff) < kMinValueLead);
+            //    }
+            //}
+            //stop();
+            //return Result.NO_MATCH;
+        }
         /**
  * Return values for BytesTrie.next(), CharsTrie.next() and similar methods.
  * @stable ICU 4.8
@@ -322,6 +416,10 @@ namespace LayoutFarm.TextBreaker
                 return -1;
             }
             return delta;
+        }
+        public int Tx2(char c)
+        {
+            return Transform(c);
         }
         public int Match(CharacterIterator text, int maxLength, int[] lengths, int[] count, int limit, int[] values)
         {
