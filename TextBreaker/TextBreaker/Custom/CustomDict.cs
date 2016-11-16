@@ -1,10 +1,14 @@
 ﻿//MIT, 2016, WinterDev
+// some code from icu-project
+// © 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html#License
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace LayoutFarm.TextBreaker.CustomBreaker
+namespace LayoutFarm.TextBreaker.Custom
 {
     /// <summary>
     /// my custom dic
@@ -53,8 +57,6 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                 wordGroup.DoIndex();
             }
         }
-
-
         public WordGroup GetStateForFirstChar(char c)
         {
             WordGroup wordGroup;
@@ -75,109 +77,21 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
     }
 
 
-    public class CustomBreaker
+   
+    
+    public struct BreakSpan
     {
-        CustomDic _customDic;
-        public void AddDic(CustomDic customDic)
-        {
-            _customDic = customDic;
-        }
-        public void BreakWords(string inputstr)
-        {
-            //conver to char buffer
-            char[] charBuff = inputstr.ToCharArray();
-            int j = charBuff.Length;
-            WordVisitor visitor = new WordVisitor(charBuff, 0);
-
-            for (int i = 0; i < j; )
-            {
-                //find proper start words;
-                char c = charBuff[i];
-                WordGroup state = _customDic.GetStateForFirstChar(c);
-                if (state == null)
-                {
-                    //continue next char
-                    ++i;
-                }
-                else
-                {
-                    //use this to find a proper word
-                    int prevIndex = i;
-                    visitor.SetCurrentIndex(i + 1);
-                    state.FindBreak(visitor);
-                    i = visitor.LatestBreakAt;
-                    if(prevIndex ==i)
-                    {
-                    }
-                }
-            }
-        }
+        public int startAt;
+        public int len;
     }
 
-
+     
     public enum DataState
     {
         UnIndex,
         Indexed,
         TooLongPrefix,
         SmallAmountOfMembers
-    }
-
-    public class WordVisitor
-    {
-        List<string> possibleWords = new List<string>();
-        List<int> breakAtList = new List<int>();
-        char[] buffer;
-        int bufferLen;
-        int startIndex;
-        int currentIndex;
-        char currentChar;
-        int latestBreakAt;
-
-        public WordVisitor(char[] buffer, int index)
-        {
-            this.buffer = buffer;
-            this.bufferLen = buffer.Length;
-            this.startIndex = currentIndex = index;
-            this.currentChar = buffer[currentIndex];
-        }
-        public int CurrentIndex
-        {
-            get { return this.currentIndex; }
-        }
-        public char Char
-        {
-            get { return currentChar; }
-        }
-        public bool ReadNext()
-        {
-            if (currentIndex < bufferLen + 1)
-            {
-                currentIndex++;
-                currentChar = buffer[currentIndex];
-                return true;
-            }
-            return false;
-        }
-        public bool IsEnd
-        {
-            get { return currentIndex >= bufferLen; }
-        }
-
-        public void AddWordBreakAt(int index)
-        {
-            this.latestBreakAt = index;
-            breakAtList.Add(index);
-        }
-        public int LatestBreakAt
-        {
-            get { return this.latestBreakAt; }
-        }
-        public void SetCurrentIndex(int index)
-        {
-            this.currentIndex = index;
-            this.currentChar = buffer[index];
-        }
     }
 
     public class WordGroup
@@ -197,6 +111,11 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
         {
             get;
             private set;
+        }
+        bool PrefixIsWord
+        {
+            get;
+            set;
         }
         public int PrefixLen { get; private set; }
         public void AddWord(string word)
@@ -249,7 +168,14 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                 }
                 else
                 {
-                    indexMemberWords.Add(w);
+                    if (w == this.Prefix)
+                    {
+                        this.PrefixIsWord = true;
+                    }
+                    else
+                    {
+                        indexMemberWords.Add(w);
+                    }
                 }
             }
             this.DataState = DataState.Indexed;
@@ -267,9 +193,9 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                 else
                 {
                     subgroup.DataState = DataState.SmallAmountOfMembers;
+                    subgroup.DoIndexOfSmallAmount();
                 }
             }
-
             //--------------------------------
             this.DataState = DataState.Indexed;
             if (this.indexMemberWords.Count == 0)
@@ -283,7 +209,24 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                 wordGroups = null;
             }
         }
+        void DoIndexOfSmallAmount()
+        {
+            //check ext
+            int j = unIndexMemberWords.Count;
+            int thisPrefixLen = this.PrefixLen;
+            int doSepAt = thisPrefixLen;
+            for (int i = 0; i < j; ++i)
+            {
+                string w = unIndexMemberWords[i];
+                if (w == this.Prefix)
+                {
+                    this.PrefixIsWord = true;
+                    break;
+                }
+            }
 
+
+        }
         struct CandidateWord
         {
             public int w_index;
@@ -295,27 +238,37 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
             }
         }
 
-        public void FindBreak(WordVisitor visitor)
+
+        internal void FindBreak(WordVisitor visitor)
         {
             //recursive
             char c = visitor.Char;
-            bool foundInSubgroup = false;
+            visitor.FoundWord = false;
             if (wordGroups != null)
             {
                 WordGroup foundSubGroup;
                 if (wordGroups.TryGetValue(c, out foundSubGroup))
                 {
                     //found next group
-                    foundInSubgroup = true;
+
                     if (!visitor.IsEnd)
                     {
-                        visitor.SetCurrentIndex(visitor.CurrentIndex + 1);
+                        int index = visitor.CurrentIndex;
+                        visitor.SetCurrentIndex(index + 1);
+
+
                         foundSubGroup.FindBreak(visitor);
+
+                        if (!visitor.FoundWord)
+                        {
+                            //not found in deeper level
+                            visitor.SetCurrentIndex(index);
+                        }
                     }
                 }
             }
             //-------
-            if (!foundInSubgroup)
+            if (!visitor.FoundWord)
             {
                 if (indexMemberWords != null)
                 {
@@ -332,7 +285,7 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                     //and select the one that 
                     int pos = visitor.CurrentIndex;
                     int latestBreak = visitor.LatestBreakAt;
-                    int len = pos - latestBreak;
+                    int len = (pos - latestBreak);
                     int n = unIndexMemberWords.Count;
 
                     List<CandidateWord> candidateWords = new List<CandidateWord>();
@@ -342,6 +295,7 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                         //begin new word
                         string w = unIndexMemberWords[i];
                         int savedIndex = visitor.CurrentIndex;
+                        c = visitor.Char;
                         int wordLen = w.Length;
                         int matchCharCount = 0;
                         if (wordLen > len)
@@ -375,7 +329,10 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                             candidate.w_index = i;
                             candidate.w_len = wordLen;
                             candidate.max_match = len + matchCharCount;
-                            candidateWords.Add(candidate);
+                            if (candidate.IsFullMatch())
+                            {
+                                candidateWords.Add(candidate);
+                            }
                         }
                         visitor.SetCurrentIndex(savedIndex);
                     }
@@ -387,6 +344,7 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                         {
                             visitor.AddWordBreakAt(
                                 visitor.LatestBreakAt + candidate.max_match);
+                            visitor.SetCurrentIndex(visitor.LatestBreakAt);
                         }
                         else
                         {
@@ -395,7 +353,40 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                     }
                     else if (candidateWords.Count > 0)
                     {
+                        //match more than 1 
+                        //select only full match
+                        //choose the longest 
 
+                        CandidateWord candidate = candidateWords[candidateWords.Count - 1];
+                        visitor.AddWordBreakAt(
+                               visitor.LatestBreakAt + candidate.max_match);
+                        visitor.SetCurrentIndex(visitor.LatestBreakAt);
+
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+                if (!visitor.FoundWord)
+                {
+                    if (this.PrefixIsWord)
+                    {
+                        int savedIndex = visitor.CurrentIndex;
+                        int newBerakAt = visitor.LatestBreakAt + this.PrefixLen;
+                        visitor.SetCurrentIndex(newBerakAt);
+                        //check next char can be the char of new word or not
+                        //this depends on each lang 
+                        char canBeStartChar = visitor.Char;
+                        if (visitor.CanbeStartChar(canBeStartChar))
+                        {
+                            visitor.AddWordBreakAt(newBerakAt);
+                        }
+                        else
+                        {
+                            visitor.SetCurrentIndex(savedIndex);
+                        }
                     }
                 }
             }
@@ -404,8 +395,14 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
                 if (indexMemberWords != null)
                 {
                     //find word
-                    visitor.AddWordBreakAt(visitor.CurrentIndex);
-
+                    if (!visitor.FoundWord)
+                    {
+                        visitor.AddWordBreakAt(visitor.LatestBreakAt + this.PrefixLen);
+                        visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                    }
+                    else
+                    {
+                    }
 
                 }
 
@@ -421,6 +418,7 @@ namespace LayoutFarm.TextBreaker.CustomBreaker
             }
 
         }
+
 #if DEBUG
         public override string ToString()
         {

@@ -9,7 +9,10 @@
 */
 using System;
 using System.IO;
-namespace LayoutFarm.TextBreaker
+
+//test only1 
+
+namespace LayoutFarm.TextBreaker.ICU
 {
     public static class DictionaryData
     {

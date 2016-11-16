@@ -35,9 +35,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreakEngine.cs" />
-    <Compile Include="CustomDict.cs" />
-    <Compile Include="DictionaryBreakEngine.cs" />
-    <Compile Include="DictionaryData.cs" />
+    <Compile Include="Custom\CustomBreaker.cs" />
+    <Compile Include="Custom\CustomDict.cs" />
+    <Compile Include="Custom\DictionaryBreakingEngine.cs" />
+    <Compile Include="Custom\ThaiDictionaryBreakingEngine.cs" />
+    <Compile Include="Custom\WordVisitor.cs" />
+    <Compile Include="ICU\DictionaryBreakEngine.cs" />
+    <Compile Include="ICU\DictionaryData.cs" />
     <Compile Include="EnBreakEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
