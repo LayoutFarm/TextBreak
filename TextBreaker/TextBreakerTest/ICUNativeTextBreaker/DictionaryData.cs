@@ -11,7 +11,7 @@ using System;
 using System.IO;
 
 //test only1 
-
+#if TEST_ICU
 namespace LayoutFarm.TextBreaker.ICU
 {
     public static class DictionaryData
@@ -481,3 +481,6 @@ namespace LayoutFarm.TextBreaker.ICU
         //}
     }
 }
+
+
+#endif

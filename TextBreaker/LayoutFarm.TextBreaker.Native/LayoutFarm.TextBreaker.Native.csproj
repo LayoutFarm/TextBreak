@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{09EC5531-D272-40DB-87A4-B2D353846CC2}</ProjectGuid>
+    <ProjectGuid>{777178CA-C706-406F-856D-62CC40AC63E4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LayoutFarm.TextBreaker</RootNamespace>
-    <AssemblyName>LayoutFarm.TextBreaker</AssemblyName>
+    <RootNamespace>LayoutFarm.TextBreaker.Native</RootNamespace>
+    <AssemblyName>LayoutFarm.TextBreaker.Native</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,15 +35,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BreakEngine.cs" />
-    <Compile Include="Custom\CustomBreaker.cs" />
-    <Compile Include="Custom\CustomDict.cs" />
-    <Compile Include="Custom\DictionaryBreakingEngine.cs" />
-    <Compile Include="Custom\ThaiDictionaryBreakingEngine.cs" />
-    <Compile Include="Custom\WordVisitor.cs" />
-    <Compile Include="ICU\DictionaryBreakEngine.cs" />
-    <Compile Include="ICU\DictionaryData.cs" />
-    <Compile Include="EnBreakEngine.cs" />
+    <Compile Include="NativeText\NativeDll.cs" />
+    <Compile Include="NativeText\NativeTextBreaker.cs" />
+    <Compile Include="NativeText\TextBreaker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -5,8 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using LayoutFarm.TextBreaker;
-using LayoutFarm.TextBreaker.Custom;
+using LayoutFarm.TextBreaker; 
 
 namespace TextBreakerTest
 {
@@ -15,10 +14,7 @@ namespace TextBreakerTest
         public Form1()
         {
             InitializeComponent();
-            
-
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             //break
@@ -37,40 +33,65 @@ namespace TextBreakerTest
         private void cmdReadDict_Click(object sender, EventArgs e)
         {
 
-            LayoutFarm.TextBreaker.ICU.DictionaryData.LoadData("../../../icu58/brkitr/thaidict.dict");
+            // LayoutFarm.TextBreaker.ICU.DictionaryData.LoadData("../../../icu58/brkitr/thaidict.dict");
         }
 
-        CustomDic customDic;
         ThaiDictionaryBreakingEngine thaiDicBreakingEngine;
+        LaoDictionaryBreakingEngine laoDicBreakingEngine;
         private void cmdCustomBuild_Click(object sender, EventArgs e)
         {
+            CustomBreaker breaker1 = new CustomBreaker();
             //test read dict data line
             //1. load dic
-            if (customDic == null)
+            if (thaiDicBreakingEngine == null)
             {
-                customDic = new CustomDic();
-                customDic.LoadFromTextfile("../../../icu58/brkitr_src/dictionaries/thaidict.txt");
+                var customDic = new CustomDic();
                 thaiDicBreakingEngine = new ThaiDictionaryBreakingEngine();
                 thaiDicBreakingEngine.SetDictionaryData(customDic);
-
+                customDic.SetCharRange(thaiDicBreakingEngine.FirstUnicodeChar, thaiDicBreakingEngine.LastUnicodeChar);
+                customDic.LoadFromTextfile("../../../icu58/brkitr_src/dictionaries/thaidict.txt");
+                breaker1.AddBreakingEngine(thaiDicBreakingEngine);
             }
-            //2. create dictionary based breaking engine
-            CustomBreaker breaker1 = new CustomBreaker();
-            breaker1.AddBreakingEngine(thaiDicBreakingEngine);
-            char[] test = this.textBox1.Text.ToCharArray();
-            breaker1.BreakWords(test, 0);
-            this.listBox1.Items.Clear();
-            foreach (var span in breaker1.GetBreakSpanIter())
+            if (laoDicBreakingEngine == null)
             {
-                string s = new string(test, span.startAt, span.len);
-                this.listBox1.Items.Add(span.startAt + " " + s);
+                var customDic = new CustomDic();
+                laoDicBreakingEngine = new LaoDictionaryBreakingEngine();
+                laoDicBreakingEngine.SetDictionaryData(customDic);
+                customDic.SetCharRange(laoDicBreakingEngine.FirstUnicodeChar, laoDicBreakingEngine.LastUnicodeChar);
+                customDic.LoadFromTextfile("../../../icu58/brkitr_src/dictionaries/laodict.txt");
+                breaker1.AddBreakingEngine(laoDicBreakingEngine);
             }
+            //2. create dictionary based breaking engine 
+            // 
+            char[] test = this.textBox1.Text.ToCharArray();
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            for (int i = 0; i < 1; ++i)
+            {
+                breaker1.BreakWords(test, 0);
+                this.listBox1.Items.Clear();
+                foreach (var span in breaker1.GetBreakSpanIter())
+                {
+                    string s = new string(test, span.startAt, span.len);
+                    this.listBox1.Items.Add(span.startAt + " " + s);
+                }
+            }
+            stopWatch.Stop();
+            Console.WriteLine(stopWatch.ElapsedMilliseconds);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string test1= "ผู้ใหญ่หาผ้าใหม่ให้สะใภ้ใช้คล้องคอ ใฝ่ใจเอาใส่ห่อมิหลงใหลใครขอดู จะใคร่ลงเรือใบดูน้ำใสและปลาปู สิ่งใดอยู่ในตู้มิใช่อยู่ใต้ตั่งเตียง บ้าใบถือใยบัวหูตามัวมาให้เคียง เล่าเท่าอย่าละเลี่ยงยี่สิบม้วนจำจงดี";
+            //string test1 = "ผู้ใหญ่หาผ้าใหม่ให้สะใภ้ใช้คล้องคอใฝ่ใจเอาใส่ห่อมิหลงใหลใครขอดูจะใคร่ลงเรือใบดูน้ำใสและปลาปูสิ่งใดอยู่ในตู้มิใช่อยู่ใต้ตั่งเตียงบ้าใบถือใยบัวหูตามัวมาให้เคียงเล่าเท่าอย่าละเลี่ยงยี่สิบม้วนจำจงดี";
+            //string test1 = "แป้นพิมลาว";
+            string test1 = "ແປ້ນພິມລາວ";
             this.textBox1.Text = test1;
         }
+
+        private void cmdIcuTest_Click(object sender, EventArgs e)
+        {
+
+        }
+        
     }
 }

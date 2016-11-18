@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -44,6 +45,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="ICUNativeTextBreaker\IcuTextBreaker.cs" />
+    <Compile Include="ICUNativeTextBreaker\DictionaryData.cs" />
+    <Compile Include="ICUNativeTextBreaker\TextBreaker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -69,9 +73,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TextBreaker\TextBreaker.csproj">
+    <ProjectReference Include="..\LayoutFarm.TextBreaker.Native\LayoutFarm.TextBreaker.Native.csproj">
+      <Project>{777178CA-C706-406F-856D-62CC40AC63E4}</Project>
+      <Name>LayoutFarm.TextBreaker.Native</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TextBreaker\LayoutFarm.TextBreaker.csproj">
       <Project>{09EC5531-D272-40DB-87A4-B2D353846CC2}</Project>
-      <Name>TextBreaker</Name>
+      <Name>LayoutFarm.TextBreaker</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

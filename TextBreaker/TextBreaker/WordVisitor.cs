@@ -8,9 +8,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace LayoutFarm.TextBreaker.Custom
+namespace LayoutFarm.TextBreaker 
 {
+    public enum VisitorState
+    {
+        Init,
+        Parsing,
+        OutOfRangeChar,
+        End,
 
+    }
     public class WordVisitor
     {
         CustomBreaker ownerBreak;
@@ -22,19 +29,24 @@ namespace LayoutFarm.TextBreaker.Custom
         char currentChar;
         int latestBreakAt;
 
+        List<CandidateWord> tempCandidateWords = new List<CandidateWord>();
+
         public WordVisitor(CustomBreaker ownerBreak)
         {
             this.ownerBreak = ownerBreak;
         }
         public void LoadText(char[] buffer, int index)
         {
-
             this.buffer = buffer;
             this.bufferLen = buffer.Length;
             this.startIndex = currentIndex = index;
             this.currentChar = buffer[currentIndex];
         }
-
+        public VisitorState State
+        {
+            get;
+            set;
+        }
         public int CurrentIndex
         {
             get { return this.currentIndex; }
@@ -53,6 +65,7 @@ namespace LayoutFarm.TextBreaker.Custom
             }
             return false;
         }
+       
         public bool IsEnd
         {
             get { return currentIndex >= bufferLen - 1; }
@@ -61,7 +74,6 @@ namespace LayoutFarm.TextBreaker.Custom
 
         public void AddWordBreakAt(int index)
         {
-
 #if DEBUG
             if (index == latestBreakAt)
             {
@@ -82,7 +94,7 @@ namespace LayoutFarm.TextBreaker.Custom
             this.currentIndex = index;
             if (index < buffer.Length)
             {
-                this.currentChar = buffer[index]; 
+                this.currentChar = buffer[index];
             }
         }
         public bool CanbeStartChar(char c)
@@ -90,8 +102,18 @@ namespace LayoutFarm.TextBreaker.Custom
             return ownerBreak.CanBeStartChar(c);
         }
         public List<int> GetBreakList()
-        {
+        {            
             return breakAtList;
+        }
+        internal List<CandidateWord> GetTempCandidateWords()
+        {
+            return this.tempCandidateWords;
+        }
+
+        internal CustomDic CurrentCustomDic
+        {
+            get;
+            set;
         }
     }
 

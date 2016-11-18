@@ -33,6 +33,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.cmdReadDict = new System.Windows.Forms.Button();
             this.cmdCustomBuild = new System.Windows.Forms.Button();
+            this.cmdIcuTest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cmdBreak
@@ -81,11 +82,22 @@
             this.cmdCustomBuild.UseVisualStyleBackColor = true;
             this.cmdCustomBuild.Click += new System.EventHandler(this.cmdCustomBuild_Click);
             // 
+            // cmdIcuTest
+            // 
+            this.cmdIcuTest.Location = new System.Drawing.Point(432, 44);
+            this.cmdIcuTest.Name = "cmdIcuTest";
+            this.cmdIcuTest.Size = new System.Drawing.Size(130, 35);
+            this.cmdIcuTest.TabIndex = 5;
+            this.cmdIcuTest.Text = "IcuTest";
+            this.cmdIcuTest.UseVisualStyleBackColor = true;
+            this.cmdIcuTest.Click += new System.EventHandler(this.cmdIcuTest_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(675, 507);
+            this.Controls.Add(this.cmdIcuTest);
             this.Controls.Add(this.cmdCustomBuild);
             this.Controls.Add(this.cmdReadDict);
             this.Controls.Add(this.textBox1);
@@ -106,6 +118,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button cmdReadDict;
         private System.Windows.Forms.Button cmdCustomBuild;
+        private System.Windows.Forms.Button cmdIcuTest;
     }
 }
 
