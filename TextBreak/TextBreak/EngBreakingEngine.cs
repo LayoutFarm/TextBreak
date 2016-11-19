@@ -1,11 +1,17 @@
-﻿//MIT, 2016, WinterDev 
+﻿//MIT, 2016, WinterDev
+// some code from icu-project
+// © 2016 and later: Unicode, Inc. and others.
+// License & terms of use: http://www.unicode.org/copyright.html#License
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace LayoutFarm.TextBreak
 {
-
-    public class EnTextBreaker : TextBreaker
+    public class EngBreakingEngine : BreakingEngine
     {
-
         enum LexState
         {
             Init,
@@ -14,7 +20,25 @@ namespace LayoutFarm.TextBreak
             Number,
         }
         BreakBounds breakBounds = new BreakBounds();
-        public override void DoBreak(char[] input, int start, int len, OnBreak onbreak)
+        public override void BreakWord(WordVisitor visitor, char[] charBuff, int startAt, int len)
+        {
+            visitor.State = VisitorState.Parsing;
+            DoBreak(visitor, charBuff, startAt, len, bb =>
+            {
+                visitor.AddWordBreakAt(bb.startIndex + bb.length);
+                visitor.SetCurrentIndex(visitor.LatestBreakAt);
+
+            });
+        }
+        public override bool CanHandle(char c)
+        {
+            return c <= 255;
+        }
+        public override bool CanBeStartChar(char c)
+        {
+            return true;
+        }
+        void DoBreak(WordVisitor visitor, char[] input, int start, int len, OnBreak onbreak)
         {
             //----------------------------------------
             //simple break word/ num/ punc / space
@@ -22,9 +46,28 @@ namespace LayoutFarm.TextBreak
             //----------------------------------------
             LexState lexState = LexState.Init;
             int endBefore = start + len;
+
+
+            char first = (char)1;
+            char last = (char)255;
+
             for (int i = start; i < endBefore; ++i)
             {
                 char c = input[i];
+                if (c < first || c > last)
+                {
+                    //clear accum state
+                    if (i > start)
+                    {
+                        //some remaining data
+                        breakBounds.length = i - breakBounds.startIndex;
+                        onbreak(breakBounds);
+
+                    }
+
+                    visitor.State = VisitorState.OutOfRangeChar;
+                    return;
+                }
                 switch (lexState)
                 {
                     case LexState.Init:
@@ -156,8 +199,8 @@ namespace LayoutFarm.TextBreak
                 //some remaining data
                 breakBounds.length = (start + len) - breakBounds.startIndex;
                 onbreak(breakBounds);
+                visitor.State = VisitorState.End;
             }
         }
     }
-
 }
