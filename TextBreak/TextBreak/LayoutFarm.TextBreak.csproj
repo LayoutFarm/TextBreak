@@ -8,8 +8,8 @@
     <ProjectGuid>{09EC5531-D272-40DB-87A4-B2D353846CC2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LayoutFarm.TextBreak</RootNamespace>
-    <AssemblyName>LayoutFarm.TextBreak</AssemblyName>
+    <RootNamespace>LayoutFarm.TextBreaker</RootNamespace>
+    <AssemblyName>LayoutFarm.TextBreaker</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -35,15 +35,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BreakEngine.cs" />
-    <Compile Include="CustomBreakBuilder.cs" />
     <Compile Include="CustomBreaker.cs" />
+    <Compile Include="CustomBreakerBuilder.cs" />
     <Compile Include="CustomDict.cs" />
     <Compile Include="BreakingEngine.cs" />
     <Compile Include="EngBreakingEngine.cs" />
     <Compile Include="LaoDictionaryBreakingEngine.cs" />
     <Compile Include="ThaiDictionaryBreakingEngine.cs" />
     <Compile Include="WordVisitor.cs" />
-    <Compile Include="EnBreakEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

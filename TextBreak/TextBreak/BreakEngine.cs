@@ -40,7 +40,7 @@ namespace LayoutFarm.TextBreak
             //to end
             DoBreak(charBuff, 0, charBuff.Length, onbreak);
         }
-
+       
         protected bool IsCanceled { get; set; }
         /// <summary>
         /// cancel current breaking task

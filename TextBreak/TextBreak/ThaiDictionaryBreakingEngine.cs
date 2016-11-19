@@ -24,11 +24,7 @@ namespace LayoutFarm.TextBreak
         {
             get { return _customDic; }
         }
-
-        public override void BreakWord(WordVisitor visitor, char[] charBuff, int startAt, int len)
-        {
-            base.BreakWord(visitor, charBuff, startAt, len);
-        }
+         
         public override bool CanBeStartChar(char c)
         {
             return canbeStartChars[c - this.FirstUnicodeChar];

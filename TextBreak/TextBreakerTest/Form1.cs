@@ -15,33 +15,22 @@ namespace TextBreakerTest
         {
             InitializeComponent();
         }
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //break
-            EnTextBreaker enTextBreaker = new EnTextBreaker();
-            string text = this.textBox1.Text;
-            listBox1.Items.Clear();
-            char[] textBuffer = text.ToCharArray();
-            enTextBreaker.DoBreak(textBuffer, bounds =>
-            {
-                listBox1.Items.Add(
-                    new string(textBuffer, bounds.startIndex, bounds.length));
-
-
-            });
-        }
+      
         private void cmdReadDict_Click(object sender, EventArgs e)
         {
 
             // LayoutFarm.TextBreaker.ICU.DictionaryData.LoadData("../../../icu58/brkitr/thaidict.dict");
         }
 
-    
+     
         private void cmdCustomBuild_Click(object sender, EventArgs e)
         {
-            CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries"; 
+
+            CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries";
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
-           
+         
+            //2. create dictionary based breaking engine 
+            // 
             char[] test = this.textBox1.Text.ToCharArray();
             System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
             stopWatch.Start();
@@ -71,6 +60,6 @@ namespace TextBreakerTest
         {
 
         }
-
+        
     }
 }

@@ -14,7 +14,6 @@ namespace LayoutFarm.TextBreak
     {
         //default for latin breaking engine
         EngBreakingEngine engBreakingEngine = new EngBreakingEngine();
-
         //current lang breaking engine
         BreakingEngine breakingEngine;
         List<BreakingEngine> otherEngines = new List<BreakingEngine>();
@@ -109,6 +108,10 @@ namespace LayoutFarm.TextBreak
         public bool CanBeStartChar(char c)
         {
             return breakingEngine.CanBeStartChar(c);
+        }
+        public void LoadBreakAtList(List<int> outputList)
+        {
+            outputList.AddRange(visitor.GetBreakList());
         }
         public IEnumerable<BreakSpan> GetBreakSpanIter()
         {
