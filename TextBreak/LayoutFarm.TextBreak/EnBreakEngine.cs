@@ -1,6 +1,6 @@
 ﻿//MIT, 2016, WinterDev 
 
-namespace LayoutFarm.TextBreaker
+namespace LayoutFarm.TextBreak
 {
 
     public class EnTextBreaker : TextBreaker

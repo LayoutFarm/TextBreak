@@ -7,9 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using PixelFarm.Drawing.Text;
 
-namespace PixelFarm.Drawing.Text
+
+namespace LayoutFarm.TextBreak.ICU
 {
     static class NativeTextBreakerLib
     {

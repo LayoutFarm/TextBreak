@@ -1,7 +1,7 @@
 ﻿//MIT, 2016, WinterDev
 //some code from ICU project with BSD license
 
-namespace LayoutFarm.TextBreaker
+namespace LayoutFarm.TextBreak
 {
     public enum TextBreakKind
     {
@@ -40,7 +40,7 @@ namespace LayoutFarm.TextBreaker
             //to end
             DoBreak(charBuff, 0, charBuff.Length, onbreak);
         }
-       
+
         protected bool IsCanceled { get; set; }
         /// <summary>
         /// cancel current breaking task

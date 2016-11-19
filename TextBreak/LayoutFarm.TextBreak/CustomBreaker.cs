@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace LayoutFarm.TextBreaker 
+namespace LayoutFarm.TextBreak
 {
     public class CustomBreaker
     {
@@ -63,7 +63,7 @@ namespace LayoutFarm.TextBreaker
             BreakingEngine currentEngine = SelectEngine(c);
             breakingEngine = currentEngine;
             //----------------------------------------
-            
+
             //----------------------------------------
             //select breaking engine
             bool continueParse = true;

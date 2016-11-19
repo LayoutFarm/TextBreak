@@ -5,7 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using LayoutFarm.TextBreaker; 
+using LayoutFarm.TextBreak;
 
 namespace TextBreakerTest
 {
@@ -92,6 +92,6 @@ namespace TextBreakerTest
         {
 
         }
-        
+
     }
 }
