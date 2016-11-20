@@ -76,6 +76,10 @@ namespace LayoutFarm.TextBreak
 
         public void AddWordBreakAt(int index)
         {
+            if (index == 9)
+            {
+            }
+
 #if DEBUG
             if (index == latestBreakAt)
             {
@@ -96,6 +100,10 @@ namespace LayoutFarm.TextBreak
             if (index < buffer.Length)
             {
                 this.currentChar = buffer[index];
+            }
+            else
+            {
+                this.State = VisitorState.End;
             }
         }
         public bool CanbeStartChar(char c)

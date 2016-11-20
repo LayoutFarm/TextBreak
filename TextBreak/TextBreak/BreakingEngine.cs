@@ -38,6 +38,9 @@ namespace LayoutFarm.TextBreak
             {
                 //find proper start words;
                 char c = charBuff[i];
+                if (c == 'ใ')
+                {
+                }
                 //----------------------
                 //check if c is in our responsiblity
                 if (c < c_first || c > c_last)
@@ -48,7 +51,7 @@ namespace LayoutFarm.TextBreak
                     return;
                 }
                 //----------------------
-                WordGroup wordgroup = GetWordGroupForFirstChar(c); 
+                WordGroup wordgroup = GetWordGroupForFirstChar(c);
                 if (wordgroup == null)
                 {
                     //continue next char
@@ -57,14 +60,26 @@ namespace LayoutFarm.TextBreak
                 }
                 else
                 {
-                    //use this to find a proper word
-                    int prevIndex = i;
+                    //we found word group for c
+                    int prevIndex = i;                    
+                    //move to next char
                     visitor.SetCurrentIndex(i + 1);
+
+                    //find break 
                     wordgroup.FindBreak(visitor);
+
+
+
+
                     if (visitor.State == VisitorState.OutOfRangeChar)
                     {
                         return;
                     }
+                    else if (visitor.State == VisitorState.End)
+                    {
+                        return;
+                    }
+
                     i = visitor.LatestBreakAt;
                     if (prevIndex == i)
                     {
@@ -77,8 +92,7 @@ namespace LayoutFarm.TextBreak
                         else
                         {
                             //current char is not found in dic
-                            //check if it can stand alone or not
-
+                            //check if it can stand alone or not 
                             if (!visitor.CanbeStartChar(visitor.Char))
                             {
                                 //if not

@@ -30,8 +30,10 @@ namespace TextBreakerTest
             InitIcuLib();
             //thai
             currentLocale = "th-TH";
-            string test1 = "ผู้ใหญ่หาผ้าใหม่ให้สะใภ้ใช้คล้องคอ ใฝ่ใจเอาใส่ห่อมิหลงใหลใครขอดูจะใคร่ลงเรือใบดูน้ำใสและปลาปูสิ่งใดอยู่ในตู้มิใช่อยู่ใต้ตั่งเตียงบ้าใบถือใยบัวหูตามัวมาให้เคียงเล่าเท่าอย่าละเลี่ยงยี่สิบม้วนจำจงดี";
+            //string test1 = "ผู้ใหญ่หาผ้าใหม่ให้สะใภ้ใช้คล้องคอ ใฝ่ใจเอาใส่ห่อมิหลงใหลใครขอดูจะใคร่ลงเรือใบดูน้ำใสและปลาปูสิ่งใดอยู่ในตู้มิใช่อยู่ใต้ตั่งเตียงบ้าใบถือใยบัวหูตามัวมาให้เคียงเล่าเท่าอย่าละเลี่ยงยี่สิบม้วนจำจงดี";
+            //string test1 = "ขาย อ";
             //string test1 = "แป้นพิมลาว";            
+            string test1 = "ผ้าใหม่";
             //----------------
             //
             //lao
@@ -121,7 +123,7 @@ namespace TextBreakerTest
             //-------------------
             CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries";
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
-            char[] test = this.textBox1.Text.ToCharArray(); 
+            char[] test = this.textBox1.Text.ToCharArray();
             //-------------
             for (int i = ntimes - 1; i >= 0; --i)
             {
@@ -134,7 +136,7 @@ namespace TextBreakerTest
         }
         void ParseWithIcu(int ntimes)
         {
-           
+
             //-------------------
             if (nativeTextBreak == null)
             {

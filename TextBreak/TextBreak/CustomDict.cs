@@ -326,7 +326,10 @@ namespace LayoutFarm.TextBreak
             for (int i = 0; i < j; ++i)
             {
                 WordSpan sp = unIndexWordSpans[i];
-
+                //string dbugStr = sp.GetString(textBuffer);
+                //if (dbugStr == "ผ้า")
+                //{
+                //}
                 if (sp.len > doSepAt)
                 {
                     char c = sp.GetChar(doSepAt, textBuffer);
@@ -449,6 +452,7 @@ namespace LayoutFarm.TextBreak
                     {
                         int index = visitor.CurrentIndex;
                         visitor.SetCurrentIndex(index + 1);
+                        //recursive
                         foundSubGroup.FindBreak(visitor);
                         if (visitor.State == VisitorState.OutOfRangeChar)
                         {
@@ -473,24 +477,22 @@ namespace LayoutFarm.TextBreak
                             char canBeStartChar = visitor.Char;
                             if (visitor.CanbeStartChar(canBeStartChar))
                             {
-                                visitor.AddWordBreakAt(newBreakAt + 1);
+                                //accept this char  
+                                //visitor.AddWordBreakAt(newBreakAt + 1);
+                                visitor.AddWordBreakAt(newBreakAt);
                                 visitor.SetCurrentIndex(visitor.LatestBreakAt);
                             }
                             else
                             {
                                 visitor.SetCurrentIndex(savedIndex);
                             }
-
                         }
-
                     }
                 }
             }
             //-------
             if (!visitor.FoundWord)
             {
-
-
                 if (unIndexWordSpans != null)
                 {
                     //at this wordgroup
@@ -559,6 +561,12 @@ namespace LayoutFarm.TextBreak
                         int savedIndex = visitor.CurrentIndex;
                         int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
                         visitor.SetCurrentIndex(newBreakAt);
+                        if (visitor.State == VisitorState.End)
+                        {
+                            visitor.AddWordBreakAt(newBreakAt);
+                            visitor.SetCurrentIndex(newBreakAt);
+                            return;
+                        }
                         //check next char can be the char of new word or not
                         //this depends on each lang 
                         char canBeStartChar = visitor.Char;
@@ -629,19 +637,7 @@ namespace LayoutFarm.TextBreak
             }
             else
             {
-
-
-                //if (unIndexMemberWords != null)
-                //{
-                //    //at this wordgroup
-                //    //no subground anymore
-                //    //so we should find the word one by one
-                //    //start at prefix
-                //    //and select the one that 
-
-                //}
             }
-
         }
 
 #if DEBUG
