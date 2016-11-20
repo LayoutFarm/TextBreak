@@ -84,7 +84,6 @@ namespace LayoutFarm.TextBreak
 #endif
             this.latestBreakAt = index;
             breakAtList.Add(index);
-
             this.FoundWord = true;
         }
         public int LatestBreakAt
