@@ -121,8 +121,7 @@ namespace TextBreakerTest
             //-------------------
             CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries";
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
-            char[] test = this.textBox1.Text.ToCharArray();
-
+            char[] test = this.textBox1.Text.ToCharArray(); 
             //-------------
             for (int i = ntimes - 1; i >= 0; --i)
             {

@@ -16,9 +16,10 @@ namespace LayoutFarm.TextBreak
     public class CustomDic
     {
         TextBuffer textBuffer;
-        Dictionary<char, WordGroup> wordGroups = new Dictionary<char, WordGroup>();
-        internal TextBuffer TextBuffer { get { return textBuffer; } }
+        WordGroup[] wordGroups;
         char firstChar, lastChar;
+
+        internal TextBuffer TextBuffer { get { return textBuffer; } }
         public void SetCharRange(char firstChar, char lastChar)
         {
             this.firstChar = firstChar;
@@ -28,12 +29,18 @@ namespace LayoutFarm.TextBreak
         public char LastChar { get { return lastChar; } }
         public void LoadFromTextfile(string filename)
         {
-            //once only
+            //once only            
             if (textBuffer != null)
             {
                 return;
             }
+            if (firstChar == '\0' || lastChar == '\0')
+            {
+                throw new NotSupportedException();
+            }
+
             //---------------
+            Dictionary<char, WordGroup> wordGroups = new Dictionary<char, WordGroup>();
             using (FileStream fs = new FileStream(filename, FileMode.Open))
             using (StreamReader reader = new StreamReader(fs))
             {
@@ -79,36 +86,52 @@ namespace LayoutFarm.TextBreak
             }
             //------------------------------------------------------------------
             textBuffer.Freeze();
+            //------------------------------------------------------------------
+            this.wordGroups = new WordGroup[this.lastChar - this.firstChar + 1];
+            foreach (var kp in wordGroups)
+            {
+                int index = TransformCharToIndex(kp.Key);
+                this.wordGroups[index] = kp.Value;
+            }
+
             //do index
             DoIndex();
         }
-
+        int TransformCharToIndex(char c)
+        {
+            return c - this.firstChar;
+        }
         void DoIndex()
         {
-            foreach (WordGroup wordGroup in wordGroups.Values)
+            for (int i = wordGroups.Length - 1; i >= 0; --i)
             {
-                wordGroup.DoIndex(this.textBuffer, this);
+                WordGroup wordGroup = wordGroups[i];
+                if (wordGroup != null)
+                {
+                    wordGroup.DoIndex(this.textBuffer, this);
+                }
             }
         }
-
-
         public void GetWordList(char startWithChar, List<string> output)
         {
-            WordGroup found;
-            if (wordGroups.TryGetValue(startWithChar, out found))
+            if (startWithChar >= firstChar && startWithChar <= lastChar)
             {
-                //iterate and collect into 
-                found.CollectAllWords(this.textBuffer, output);
+                //in range 
+                WordGroup found = this.wordGroups[TransformCharToIndex(startWithChar)];
+                if (found != null)
+                {//iterate and collect into 
+                    found.CollectAllWords(this.textBuffer, output);
+                }
             }
         }
         internal WordGroup GetWordGroupForFirstChar(char c)
         {
-            WordGroup wordGroup;
-            if (wordGroups.TryGetValue(c, out wordGroup))
+            if (c >= firstChar && c <= lastChar)
             {
-                return wordGroup;
+                //in range
+                return  this.wordGroups[TransformCharToIndex(c)];                 
             }
-            return null;
+            return null; 
         }
     }
 
