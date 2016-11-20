@@ -176,7 +176,6 @@ namespace LayoutFarm.TextBreak
     {
         List<char> _tmpCharList;
         int position;
-        bool isFrozen;
         char[] charBuffer;
         public TextBuffer(int initCapacity)
         {
@@ -376,7 +375,17 @@ namespace LayoutFarm.TextBreak
                 if (subgroup != null)
                 {
                     hasSomeSubGroup = true;
-                    if (subgroup.UnIndexMemberCount > 10)
+
+                    //****
+                    //performance factor here,****
+                    //in this current version 
+                    //if we not call DoIndex(),
+                    //this subgroup need linear search-> so it slow                   
+                    //so we call DoIndex until member count in the group <=3
+                    //then it search faster, 
+                    //but dictionary-building time may increase.
+
+                    if (subgroup.UnIndexMemberCount > 2)
                     {
                         subgroup.DoIndex(textBuffer, owner);
                     }
