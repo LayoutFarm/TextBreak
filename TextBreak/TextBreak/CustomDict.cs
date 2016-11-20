@@ -88,7 +88,7 @@ namespace LayoutFarm.TextBreak
             foreach (WordGroup wordGroup in wordGroups.Values)
             {
                 wordGroup.DoIndex(this.textBuffer, this);
-            } 
+            }
         }
 
 
@@ -395,6 +395,17 @@ namespace LayoutFarm.TextBreak
         {
             //recursive
             char c = visitor.Char;
+            if (!visitor.CanHandle(c))
+            {
+                //if can' t handle this character
+                //then stop
+                int index = visitor.CurrentIndex;
+                visitor.AddWordBreakAt(index);
+                visitor.SetCurrentIndex(index);
+
+                visitor.State = VisitorState.OutOfRangeChar;
+                return;
+            }
             visitor.FoundWord = false;
             if (wordGroups2 != null)
             {
@@ -410,6 +421,10 @@ namespace LayoutFarm.TextBreak
                         int index = visitor.CurrentIndex;
                         visitor.SetCurrentIndex(index + 1);
                         foundSubGroup.FindBreak(visitor);
+                        if (visitor.State == VisitorState.OutOfRangeChar)
+                        {
+                            return;
+                        }
                         if (!visitor.FoundWord)
                         {
                             //not found in deeper level

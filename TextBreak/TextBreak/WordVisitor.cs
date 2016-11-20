@@ -103,6 +103,11 @@ namespace LayoutFarm.TextBreak
         {
             return ownerBreak.CanBeStartChar(c);
         }
+        public bool CanHandle(char c)
+        {
+            CustomDic dic = CurrentCustomDic;
+            return c >= dic.FirstChar && c <= dic.LastChar;
+        }
         public List<int> GetBreakList()
         {
             return breakAtList;
