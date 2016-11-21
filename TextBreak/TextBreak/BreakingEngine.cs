@@ -75,6 +75,8 @@ namespace LayoutFarm.TextBreak
                     }
 
                     bool continueRead = true;
+
+                    int savedIndex = visitor.CurrentIndex;
                     while (continueRead)
                     {
                         //not end
@@ -128,7 +130,10 @@ namespace LayoutFarm.TextBreak
                                         }
                                         if (!foundCandidate)
                                         {
-
+                                            //no next word, no candidate
+                                            //skip this 
+                                            visitor.AddWordBreakAt(visitor.LatestBreakAt + 1);
+                                            visitor.SetCurrentIndex(visitor.LatestBreakAt); 
                                         }
 
                                     }
@@ -166,7 +171,10 @@ namespace LayoutFarm.TextBreak
                                 }
                                 if (!foundCandidate)
                                 {
-
+                                    //no next word, no candidate
+                                    //skip this 
+                                    visitor.AddWordBreakAt(visitor.LatestBreakAt + 1);
+                                    visitor.SetCurrentIndex(visitor.LatestBreakAt); 
                                 }
 
                             }

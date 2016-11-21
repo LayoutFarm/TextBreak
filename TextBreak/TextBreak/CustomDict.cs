@@ -208,16 +208,6 @@ namespace LayoutFarm.TextBreak
     }
 
 
-    struct CandidateWord
-    {
-        public int w_index;
-        public int w_len;
-        public int max_match;
-        public bool IsFullMatch()
-        {
-            return w_len == max_match;
-        }
-    }
 
     public struct BreakSpan
     {
@@ -443,7 +433,7 @@ namespace LayoutFarm.TextBreak
             }
             return null;
         }
- 
+
         internal int FindInUnIndexMember(WordVisitor visitor)
         {
             if (unIndexWordSpans == null)
@@ -461,14 +451,18 @@ namespace LayoutFarm.TextBreak
             int nwords = unIndexWordSpans.Count;
             //only 1 that match 
 
-            List<CandidateWord> candidateWords = visitor.GetTempCandidateWords();
-            candidateWords.Clear();
             TextBuffer currentTextBuffer = visitor.CurrentCustomDic.TextBuffer;
 
-            for (int i = 0; i < nwords; ++i)
+            //we sort unindex string ***
+            //so we find from longest one( last) to begin 
+            for (int i = nwords - 1; i >= 0; --i)
             {
                 //loop test on each word
                 WordSpan w = unIndexWordSpans[i];
+#if DEBUG
+                //string dbugstr = w.GetString(currentTextBuffer);
+#endif
+
                 int savedIndex = visitor.CurrentIndex;
                 char c = visitor.Char;
                 int wordLen = w.len;
@@ -490,6 +484,9 @@ namespace LayoutFarm.TextBreak
                             }
                             else
                             {
+                                //no more data in visitor
+
+                                break;
                             }
                         }
                         else
@@ -501,74 +498,111 @@ namespace LayoutFarm.TextBreak
                 //reset
                 if (readLen + matchCharCount == wordLen)
                 {
-                    //full match
-                    CandidateWord candidate = new CandidateWord();
-                    candidate.w_index = i;
-                    candidate.w_len = wordLen;
-                    candidate.max_match = readLen + matchCharCount;
-
-#if DEBUG
-                    string dbugstr = w.GetString(currentTextBuffer);
-#endif
-                    candidateWords.Add(candidate);
-                }
-                visitor.SetCurrentIndex(savedIndex);
-            }
-            switch (candidateWords.Count)
-            {
-                case 0: return 0;
-                case 1:
+                    int newBreakAt = visitor.LatestBreakAt + wordLen;
+                    visitor.SetCurrentIndex(newBreakAt);
+                    //-------------------------------------------- 
+                    if (visitor.State == VisitorState.End)
                     {
-                        CandidateWord candidate = candidateWords[0];
-                        int savedIndex = visitor.CurrentIndex;
-                        int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
-                        visitor.SetCurrentIndex(newBreakAt);
-                        if (visitor.State == VisitorState.End)
-                        { 
-                            return newBreakAt;
-                        }
-                        //check next char can be the char of new word or not
-                        //this depends on each lang 
-                        char canBeStartChar = visitor.Char;
-                        if (visitor.CanHandle(canBeStartChar))
-                        {
-                            if (visitor.CanbeStartChar(canBeStartChar))
-                            {   
-                                return newBreakAt;
-                            }
-                            else
-                            {
-                                visitor.SetCurrentIndex(savedIndex);
-                                return savedIndex;
-                            }
-                        }
-                        else
-                        {
-                            visitor.State = VisitorState.OutOfRangeChar;
-                            return visitor.CurrentIndex;
-                        }
+                        return newBreakAt;
                     }
-                default:
+                    //check next char can be the char of new word or not
+                    //this depends on each lang 
+                    char canBeStartChar = visitor.Char;
+                    if (visitor.CanHandle(canBeStartChar))
                     {
-                        CandidateWord candidate = candidateWords[candidateWords.Count - 1];
-                        int savedIndex = visitor.CurrentIndex;
-                        int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
-                        visitor.SetCurrentIndex(newBreakAt);
-                        //check next char can be the char of new word or not
-                        //this depends on each lang 
-                        char canBeStartChar = visitor.Char;
                         if (visitor.CanbeStartChar(canBeStartChar))
                         {
-                            visitor.SetCurrentIndex(newBreakAt);
                             return newBreakAt;
                         }
                         else
                         {
+                            //back to savedIndex
                             visitor.SetCurrentIndex(savedIndex);
                             return savedIndex;
                         }
                     }
+                    else
+                    {
+                        visitor.State = VisitorState.OutOfRangeChar;
+                        return newBreakAt;
+                    }
+                }
+                visitor.SetCurrentIndex(savedIndex);
             }
+            return 0;
+            //int candidateCount;
+            //switch (candidateCount = candidateWords.Count)
+            //{
+            //    case 0: return 0;
+            //    case 1:
+            //        {
+            //            CandidateWord candidate = candidateWords[0];
+            //            int savedIndex = visitor.CurrentIndex;
+            //            int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
+            //            visitor.SetCurrentIndex(newBreakAt);
+            //            if (visitor.State == VisitorState.End)
+            //            {
+            //                return newBreakAt;
+            //            }
+            //            //check next char can be the char of new word or not
+            //            //this depends on each lang 
+            //            char canBeStartChar = visitor.Char;
+            //            if (visitor.CanHandle(canBeStartChar))
+            //            {
+            //                if (visitor.CanbeStartChar(canBeStartChar))
+            //                {
+            //                    return newBreakAt;
+            //                }
+            //                else
+            //                {
+            //                    //back to savedIndex
+            //                    visitor.SetCurrentIndex(savedIndex);
+            //                    return savedIndex;
+            //                }
+            //            }
+            //            else
+            //            {
+            //                visitor.State = VisitorState.OutOfRangeChar;
+            //                return visitor.CurrentIndex;
+            //            }
+            //        }
+            //    default:
+            //        {
+            //            throw new NotSupportedException();
+            //            //for (int cn = 0; cn < candidateCount; ++cn)
+            //            //{
+            //            //    CandidateWord candidate = candidateWords[cn];
+            //            //    int savedIndex = visitor.CurrentIndex;
+            //            //    int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
+            //            //    visitor.SetCurrentIndex(newBreakAt);
+            //            //    if (visitor.State == VisitorState.End)
+            //            //    {
+            //            //        return newBreakAt;
+            //            //    }
+            //            //    //check next char can be the char of new word or not
+            //            //    //this depends on each lang 
+            //            //    char canBeStartChar = visitor.Char;
+            //            //    if (visitor.CanHandle(canBeStartChar))
+            //            //    {
+            //            //        if (visitor.CanbeStartChar(canBeStartChar))
+            //            //        {
+            //            //            return newBreakAt;
+            //            //        }
+            //            //        else
+            //            //        {
+            //            //            //back to savedIndex
+            //            //            visitor.SetCurrentIndex(savedIndex);
+            //            //            return savedIndex;
+            //            //        }
+            //            //    }
+            //            //    else
+            //            //    {
+            //            //        visitor.State = VisitorState.OutOfRangeChar;
+            //            //        return visitor.CurrentIndex;
+            //            //    }
+            //            //} 
+            //        }
+            //}
         }
 
 #if DEBUG
