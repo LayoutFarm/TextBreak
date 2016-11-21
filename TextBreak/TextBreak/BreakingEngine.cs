@@ -57,6 +57,7 @@ namespace LayoutFarm.TextBreak
                     //continue next char
                     ++i;
                     visitor.AddWordBreakAt(i);
+                    visitor.SetCurrentIndex(visitor.LatestBreakAt);
                 }
                 else
                 {
