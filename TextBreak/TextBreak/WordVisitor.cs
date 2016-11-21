@@ -30,6 +30,7 @@ namespace LayoutFarm.TextBreak
         int latestBreakAt;
 
         List<CandidateWord> tempCandidateWords = new List<CandidateWord>();
+        Stack<int> tempCandidateBreaks = new Stack<int>();
 
         public WordVisitor(CustomBreaker ownerBreak)
         {
@@ -72,7 +73,7 @@ namespace LayoutFarm.TextBreak
         {
             get { return currentIndex >= bufferLen - 1; }
         }
-     
+
 
         public void AddWordBreakAt(int index)
         {
@@ -84,7 +85,7 @@ namespace LayoutFarm.TextBreak
             }
 #endif
             this.latestBreakAt = index;
-            breakAtList.Add(index); 
+            breakAtList.Add(index);
         }
         public int LatestBreakAt
         {
@@ -119,7 +120,10 @@ namespace LayoutFarm.TextBreak
         {
             return this.tempCandidateWords;
         }
-
+        internal Stack<int> GetTempCandidateBreaks()
+        {
+            return this.tempCandidateBreaks;
+        }
         internal CustomDic CurrentCustomDic
         {
             get;

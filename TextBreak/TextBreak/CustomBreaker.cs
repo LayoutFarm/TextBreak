@@ -51,7 +51,7 @@ namespace LayoutFarm.TextBreak
                         return engine;
                     }
                 }
-                
+
                 return engBreakingEngine;
             }
         }
@@ -67,8 +67,7 @@ namespace LayoutFarm.TextBreak
 
             //----------------------------------------
             //select breaking engine
-            bool continueParse = true;
-            while (continueParse)
+            for (; ; )
             {
                 //----------------------------------------
                 currentEngine.BreakWord(visitor, charBuff, startAt, charBuff.Length - startAt);
@@ -77,16 +76,13 @@ namespace LayoutFarm.TextBreak
                     default: throw new NotSupportedException();
 
                     case VisitorState.End:
-                        {
-                            //ok
-                            continueParse = false;
-                        }
-                        break;
+                        //ok
+                        return;
                     case VisitorState.OutOfRangeChar:
                         {
                             //find proper breaking engine for current char
-                            c = visitor.Char;
-                            BreakingEngine anotherEngine = SelectEngine(c);
+
+                            BreakingEngine anotherEngine = SelectEngine(visitor.Char);
                             if (anotherEngine == currentEngine)
                             {
                                 throw new NotSupportedException();

@@ -470,7 +470,7 @@ namespace LayoutFarm.TextBreak
                 //begin new word
                 WordSpan w = unIndexWordSpans[i];
 #if DEBUG
-                string dbugstr = w.GetString(currentTextBuffer);
+                //string dbugstr = w.GetString(currentTextBuffer);
 #endif
                 int savedIndex = visitor.CurrentIndex;
                 char c = visitor.Char;
@@ -513,9 +513,7 @@ namespace LayoutFarm.TextBreak
                 }
                 visitor.SetCurrentIndex(savedIndex);
             }
-            if (this.PrefixIsWord)
-            {
-            }
+
             if (candidateWords.Count == 1)
             {
                 CandidateWord candidate = candidateWords[0];
@@ -575,9 +573,6 @@ namespace LayoutFarm.TextBreak
                 return 0;
 
             }
-
-
-
         }
 
 #if DEBUG

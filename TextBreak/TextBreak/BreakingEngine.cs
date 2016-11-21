@@ -38,7 +38,6 @@ namespace LayoutFarm.TextBreak
             {
                 //find proper start words;
                 char c = charBuff[i];
-
                 //----------------------
                 //check if c is in our responsiblity
                 if (c < c_first || c > c_last)
@@ -66,28 +65,24 @@ namespace LayoutFarm.TextBreak
                     }
                     //---------------------
                     WordGroup c_wordgroup = wordgroup;
-                    Stack<WordGroup> candidate1 = new Stack<WordGroup>();
-                    Stack<int> candidate2 = new Stack<int>();
+                    Stack<int> candidate = visitor.GetTempCandidateBreaks();
+                    candidate.Clear();
                     int candidateLen = 1;
                     if (c_wordgroup.PrefixIsWord)
                     {
-                        candidate1.Push(c_wordgroup);
-                        candidate2.Push(candidateLen);
+                        candidate.Push(candidateLen);
                     }
 
                     bool contRead = true;
                     while (contRead)
                     {
-
                         //not end
                         //then move next
                         candidateLen++;
                         visitor.SetCurrentIndex(i + 1);
                         WordGroup next = c_wordgroup.GetSubGroup(visitor);
-
                         //for debug
-                        //string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);
-
+                        //string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);  
                         if (next == null)
                         {
                             //no deeper group
@@ -97,10 +92,10 @@ namespace LayoutFarm.TextBreak
 
                                 int pre = visitor.CurrentIndex;
                                 int n = c_wordgroup.FindInUnIndexMember(visitor);
-                                if (n - pre > 0) 
+                                if (n - pre > 0)
                                 {
                                     visitor.AddWordBreakAt(n);
-                                    visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                                    visitor.SetCurrentIndex(n);
                                 }
                                 else
                                 {
@@ -112,14 +107,14 @@ namespace LayoutFarm.TextBreak
                                     else
                                     {
                                         bool foundCandidate = false;
-                                        while (candidate2.Count > 0)
+                                        while (candidate.Count > 0)
                                         {
-                                            int candi1 = candidate2.Pop();
+                                            int candi1 = candidate.Pop();
                                             //try
                                             visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
                                             //check if we can use this candidate
                                             char next_char = visitor.Char;
-                                            if (visitor.CanbeStartChar(next_char))
+                                            if (CanBeStartChar(next_char))
                                             {
                                                 //use this
                                                 //use this candidate if possible
@@ -141,14 +136,14 @@ namespace LayoutFarm.TextBreak
                             {
 
                                 bool foundCandidate = false;
-                                while (candidate2.Count > 0)
+                                while (candidate.Count > 0)
                                 {
-                                    int candi1 = candidate2.Pop();
+                                    int candi1 = candidate.Pop();
                                     //try
                                     visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
                                     //check if we can use this candidate
                                     char next_char = visitor.Char;
-                                    if (!visitor.CanHandle(next_char))
+                                    if (!CanHandle(next_char))
                                     {
                                         //use this
                                         //use this candidate if possible
@@ -156,8 +151,7 @@ namespace LayoutFarm.TextBreak
                                         foundCandidate = true;
                                         break;
                                     }
-
-                                    if (visitor.CanbeStartChar(next_char))
+                                    if (CanBeStartChar(next_char))
                                     {
                                         //use this
                                         //use this candidate if possible
@@ -170,8 +164,6 @@ namespace LayoutFarm.TextBreak
                                 {
 
                                 }
-
-
                                 contRead = false;
                             }
                             i = visitor.CurrentIndex;
@@ -180,8 +172,7 @@ namespace LayoutFarm.TextBreak
                         {
                             if (next.PrefixIsWord)
                             {
-                                candidate1.Push(c_wordgroup);
-                                candidate2.Push(candidateLen);
+                                candidate.Push(candidateLen);
                             }
                             c_wordgroup = next;
                             i = visitor.CurrentIndex;
