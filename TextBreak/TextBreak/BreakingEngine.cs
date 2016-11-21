@@ -34,6 +34,8 @@ namespace LayoutFarm.TextBreak
             char c_first = this.FirstUnicodeChar;
             char c_last = this.LastUnicodeChar;
             int endAt = startAt + len;
+            Stack<int> candidate = visitor.GetTempCandidateBreaks();
+
             for (int i = startAt; i < endAt; )
             {
                 //find proper start words;
@@ -65,7 +67,6 @@ namespace LayoutFarm.TextBreak
                     }
                     //---------------------
                     WordGroup c_wordgroup = wordgroup;
-                    Stack<int> candidate = visitor.GetTempCandidateBreaks();
                     candidate.Clear();
                     int candidateLen = 1;
                     if (c_wordgroup.PrefixIsWord)
@@ -73,8 +74,8 @@ namespace LayoutFarm.TextBreak
                         candidate.Push(candidateLen);
                     }
 
-                    bool contRead = true;
-                    while (contRead)
+                    bool continueRead = true;
+                    while (continueRead)
                     {
                         //not end
                         //then move next
@@ -85,17 +86,18 @@ namespace LayoutFarm.TextBreak
                         //string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);  
                         if (next == null)
                         {
+                            continueRead = false;
                             //no deeper group
                             //then check if 
                             if (c_wordgroup.UnIndexMemberCount > 0)
                             {
-
-                                int pre = visitor.CurrentIndex;
-                                int n = c_wordgroup.FindInUnIndexMember(visitor);
-                                if (n - pre > 0)
+                                int p1 = visitor.CurrentIndex;
+                                //p2: suggest position
+                                int p2 = c_wordgroup.FindInUnIndexMember(visitor);
+                                if (p2 - p1 > 0)
                                 {
-                                    visitor.AddWordBreakAt(n);
-                                    visitor.SetCurrentIndex(n);
+                                    visitor.AddWordBreakAt(p2);
+                                    visitor.SetCurrentIndex(p2);
                                 }
                                 else
                                 {
@@ -109,6 +111,7 @@ namespace LayoutFarm.TextBreak
                                         bool foundCandidate = false;
                                         while (candidate.Count > 0)
                                         {
+
                                             int candi1 = candidate.Pop();
                                             //try
                                             visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
@@ -130,7 +133,7 @@ namespace LayoutFarm.TextBreak
 
                                     }
                                 }
-                                contRead = false;
+
                             }
                             else
                             {
@@ -138,6 +141,7 @@ namespace LayoutFarm.TextBreak
                                 bool foundCandidate = false;
                                 while (candidate.Count > 0)
                                 {
+
                                     int candi1 = candidate.Pop();
                                     //try
                                     visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
@@ -164,7 +168,7 @@ namespace LayoutFarm.TextBreak
                                 {
 
                                 }
-                                contRead = false;
+
                             }
                             i = visitor.CurrentIndex;
                         }
