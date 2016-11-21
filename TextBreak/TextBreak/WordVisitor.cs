@@ -72,7 +72,7 @@ namespace LayoutFarm.TextBreak
         {
             get { return currentIndex >= bufferLen - 1; }
         }
-        internal bool FoundWord;
+     
 
         public void AddWordBreakAt(int index)
         {
@@ -84,8 +84,7 @@ namespace LayoutFarm.TextBreak
             }
 #endif
             this.latestBreakAt = index;
-            breakAtList.Add(index);
-            this.FoundWord = true;
+            breakAtList.Add(index); 
         }
         public int LatestBreakAt
         {
