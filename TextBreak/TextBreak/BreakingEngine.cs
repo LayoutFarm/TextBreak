@@ -78,14 +78,15 @@ namespace LayoutFarm.TextBreak
                     bool contRead = true;
                     while (contRead)
                     {
-                        
+
                         //not end
                         //then move next
                         candidateLen++;
                         visitor.SetCurrentIndex(i + 1);
                         WordGroup next = c_wordgroup.GetSubGroup(visitor);
-                        //debug
-                        string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);
+
+                        //for debug
+                        //string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);
 
                         if (next == null)
                         {
@@ -93,11 +94,10 @@ namespace LayoutFarm.TextBreak
                             //then check if 
                             if (c_wordgroup.UnIndexMemberCount > 0)
                             {
-                               
+
                                 int pre = visitor.CurrentIndex;
                                 int n = c_wordgroup.FindInUnIndexMember(visitor);
-                                if (n - pre > 0)
-                                //if (n > 0)
+                                if (n - pre > 0) 
                                 {
                                     visitor.AddWordBreakAt(n);
                                     visitor.SetCurrentIndex(visitor.LatestBreakAt);
