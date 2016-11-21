@@ -216,33 +216,30 @@ namespace LayoutFarm.TextBreak
     }
 
 
-    public enum DataState : byte
-    {
-        UnIndex,
-        Indexed,
-        TooLongPrefix,
-        SmallAmountOfMembers
-    }
-
-
-
     public class WordGroup
     {
-        List<WordSpan> unIndexWordSpans = new List<WordSpan>();
+        List<WordSpan> wordSpanList = new List<WordSpan>();
         WordGroup[] subGroups;
         WordSpan prefixSpan;
-#if DEBUG
-        static int debugTotalId;
-        int debugId = debugTotalId++;
-        public static int DebugTotalId { get { return debugTotalId; } }
-#endif
         internal WordGroup(WordSpan prefixSpan)
         {
             this.prefixSpan = prefixSpan;
-            this.PrefixLen = prefixSpan.len;
         }
 
-        public DataState DataState { get; private set; }
+
+#if DEBUG
+        public enum debugDataState : byte
+        {
+            UnIndex,
+            Indexed,
+            TooLongPrefix,
+            SmallAmountOfMembers
+        }
+        static int debugTotalId;
+        int debugId = debugTotalId++;
+        public static int DebugTotalId { get { return debugTotalId; } }
+        debugDataState dbugDataState;
+#endif
 
         internal string GetPrefix(TextBuffer buffer)
         {
@@ -269,62 +266,61 @@ namespace LayoutFarm.TextBreak
                     }
                 }
             }
-            if (unIndexWordSpans != null)
+            if (wordSpanList != null)
             {
-                foreach (var span in unIndexWordSpans)
+                foreach (var span in wordSpanList)
                 {
                     output.Add(span.GetString(textBuffer));
                 }
             }
         }
-        public int PrefixLen { get; private set; }
+        public int PrefixLen { get { return this.prefixSpan.len; } }
 
         internal void AddWordSpan(WordSpan span)
         {
-            unIndexWordSpans.Add(span);
-            this.DataState = DataState.UnIndex;
+            wordSpanList.Add(span);
+#if DEBUG
+            dbugDataState = debugDataState.UnIndex;
+#endif
         }
-        public int UnIndexMemberCount
+        public int WordSpanListCount
         {
             get
             {
 
-                if (unIndexWordSpans == null) return 0;
-                return unIndexWordSpans.Count;
+                if (wordSpanList == null) return 0;
+                return wordSpanList.Count;
             }
         }
-
-
-        bool _hasEvalPrefix;
         internal void DoIndex(TextBuffer textBuffer, CustomDic owner)
         {
+
             //recursive
             if (this.PrefixLen > 7)
             {
-                this.DataState = DataState.TooLongPrefix;
+                DoIndexOfSmallAmount(textBuffer);
+#if DEBUG
+                dbugDataState = debugDataState.TooLongPrefix;
+#endif
                 return;
             }
-
+            bool hasEvalPrefix = false;
             if (subGroups == null)
             {
-                //wordGroups = new Dictionary<char, WordGroup>();
                 subGroups = new WordGroup[owner.LastChar - owner.FirstChar + 1];
             }
             //--------------------------------
-            int j = unIndexWordSpans.Count;
+            int j = wordSpanList.Count;
             int thisPrefixLen = this.PrefixLen;
             int doSepAt = thisPrefixLen;
             for (int i = 0; i < j; ++i)
             {
-                WordSpan sp = unIndexWordSpans[i];
+                WordSpan sp = wordSpanList[i];
                 //string dbugStr = sp.GetString(textBuffer);
-                //if (dbugStr == "ผ้า")
-                //{
-                //}
+
                 if (sp.len > doSepAt)
                 {
                     char c = sp.GetChar(doSepAt, textBuffer);
-
                     int c_index = c - owner.FirstChar;
                     WordGroup found = subGroups[c_index];
                     if (found == null)
@@ -333,33 +329,26 @@ namespace LayoutFarm.TextBreak
                         found = new WordGroup(new WordSpan(sp.startAt, (byte)(doSepAt + 1)));
                         subGroups[c_index] = found;
                     }
-
-                    //WordGroup found;
-                    //if (!wordGroups.TryGetValue(c, out found))
-                    //{
-                    //    found = new WordGroup(new WordSpan(sp.startAt, (byte)(doSepAt + 1)));
-                    //    wordGroups.Add(c, found);
-                    //}
-
                     found.AddWordSpan(sp);
                 }
                 else
                 {
-                    if (!_hasEvalPrefix)
+                    if (!hasEvalPrefix)
                     {
                         if (sp.SameTextContent(this.prefixSpan, textBuffer))
                         {
-
-                            _hasEvalPrefix = true;
+                            hasEvalPrefix = true;
                             this.PrefixIsWord = true;
                         }
                     }
                 }
 
             }
-            this.DataState = DataState.Indexed;
-            unIndexWordSpans.Clear();
-            unIndexWordSpans = null;
+#if DEBUG
+            this.dbugDataState = debugDataState.Indexed;
+#endif
+            wordSpanList.Clear();
+            wordSpanList = null;
             //--------------------------------
             //do sup index
             //foreach (WordGroup subgroup in this.wordGroups.Values)
@@ -379,20 +368,23 @@ namespace LayoutFarm.TextBreak
                     //then it search faster, 
                     //but dictionary-building time may increase.
 
-                    if (subgroup.UnIndexMemberCount > 2)
+                    if (subgroup.WordSpanListCount > 2)
                     {
                         subgroup.DoIndex(textBuffer, owner);
                     }
                     else
                     {
-                        subgroup.DataState = DataState.SmallAmountOfMembers;
+#if DEBUG
+                        subgroup.dbugDataState = debugDataState.SmallAmountOfMembers;
+#endif
                         subgroup.DoIndexOfSmallAmount(textBuffer);
                     }
                 }
             }
             //--------------------------------
-            this.DataState = DataState.Indexed;
-
+#if DEBUG
+            this.dbugDataState = debugDataState.Indexed;
+#endif
             if (!hasSomeSubGroup)
             {
                 //clear
@@ -401,13 +393,17 @@ namespace LayoutFarm.TextBreak
         }
         void DoIndexOfSmallAmount(TextBuffer textBuffer)
         {
-            //check ext
-            int j = unIndexWordSpans.Count;
-            int thisPrefixLen = this.PrefixLen;
-            int doSepAt = thisPrefixLen;
-            for (int i = 0; i < j; ++i)
+
+            //convention...
+            //data must me sorted (ascending) before use with the wordSpanList 
+
+            for (int i = wordSpanList.Count - 1; i >= 0; --i)
             {
-                WordSpan sp = unIndexWordSpans[i];
+                WordSpan sp = wordSpanList[i];
+#if DEBUG
+                //string dbugStr = sp.GetString(textBuffer);
+#endif
+
                 if (sp.SameTextContent(this.prefixSpan, textBuffer))
                 {
                     this.PrefixIsWord = true;
@@ -436,7 +432,7 @@ namespace LayoutFarm.TextBreak
 
         internal int FindInUnIndexMember(WordVisitor visitor)
         {
-            if (unIndexWordSpans == null)
+            if (wordSpanList == null)
             {
                 throw new NotSupportedException();
             }
@@ -448,7 +444,7 @@ namespace LayoutFarm.TextBreak
             //and select the one that 
 
             int readLen = visitor.CurrentIndex - visitor.LatestBreakAt;
-            int nwords = unIndexWordSpans.Count;
+            int nwords = wordSpanList.Count;
             //only 1 that match 
 
             TextBuffer currentTextBuffer = visitor.CurrentCustomDic.TextBuffer;
@@ -458,7 +454,7 @@ namespace LayoutFarm.TextBreak
             for (int i = nwords - 1; i >= 0; --i)
             {
                 //loop test on each word
-                WordSpan w = unIndexWordSpans[i];
+                WordSpan w = wordSpanList[i];
 #if DEBUG
                 //string dbugstr = w.GetString(currentTextBuffer);
 #endif
@@ -610,12 +606,12 @@ namespace LayoutFarm.TextBreak
         {
             StringBuilder stbuilder = new StringBuilder();
             stbuilder.Append(this.prefixSpan.startAt + " " + this.prefixSpan.len);
-            stbuilder.Append(" " + this.DataState);
+            stbuilder.Append(" " + this.dbugDataState);
             //---------  
 
-            if (unIndexWordSpans != null)
+            if (wordSpanList != null)
             {
-                stbuilder.Append(",u_index=" + unIndexWordSpans.Count + " ");
+                stbuilder.Append(",u_index=" + wordSpanList.Count + " ");
             }
             return stbuilder.ToString();
         }
