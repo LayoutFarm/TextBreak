@@ -91,10 +91,7 @@ namespace TextBreakerTest
                 string s = new string(test, span.startAt, span.len);
                 this.listBox1.Items.Add(span.startAt + " " + s);
             }
-#if DEBUG
-            int totalWordGroup = WordGroup.DebugTotalId;
-        
-#endif
+ 
         }
 
 

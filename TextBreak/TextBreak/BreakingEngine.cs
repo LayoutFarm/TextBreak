@@ -91,7 +91,7 @@ namespace LayoutFarm.TextBreak
                             continueRead = false;
                             //no deeper group
                             //then check if 
-                            if (c_wordgroup.UnIndexMemberCount > 0)
+                            if (c_wordgroup.WordSpanListCount > 0)
                             {
                                 int p1 = visitor.CurrentIndex;
                                 //p2: suggest position
