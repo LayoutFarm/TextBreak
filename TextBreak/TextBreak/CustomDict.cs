@@ -208,16 +208,6 @@ namespace LayoutFarm.TextBreak
     }
 
 
-    struct CandidateWord
-    {
-        public int w_index;
-        public int w_len;
-        public int max_match;
-        public bool IsFullMatch()
-        {
-            return w_len == max_match;
-        }
-    }
 
     public struct BreakSpan
     {
@@ -226,7 +216,7 @@ namespace LayoutFarm.TextBreak
     }
 
 
-    public enum DataState
+    public enum DataState : byte
     {
         UnIndex,
         Indexed,
@@ -244,13 +234,14 @@ namespace LayoutFarm.TextBreak
 #if DEBUG
         static int debugTotalId;
         int debugId = debugTotalId++;
+        public static int DebugTotalId { get { return debugTotalId; } }
 #endif
         internal WordGroup(WordSpan prefixSpan)
         {
             this.prefixSpan = prefixSpan;
             this.PrefixLen = prefixSpan.len;
         }
-        internal WordSpan PrefixSpan { get { return this.prefixSpan; } }
+
         public DataState DataState { get; private set; }
 
         internal string GetPrefix(TextBuffer buffer)
@@ -326,7 +317,10 @@ namespace LayoutFarm.TextBreak
             for (int i = 0; i < j; ++i)
             {
                 WordSpan sp = unIndexWordSpans[i];
-
+                //string dbugStr = sp.GetString(textBuffer);
+                //if (dbugStr == "ผ้า")
+                //{
+                //}
                 if (sp.len > doSepAt)
                 {
                     char c = sp.GetChar(doSepAt, textBuffer);
@@ -414,234 +408,201 @@ namespace LayoutFarm.TextBreak
             for (int i = 0; i < j; ++i)
             {
                 WordSpan sp = unIndexWordSpans[i];
-                if (sp.SameTextContent(this.PrefixSpan, textBuffer))
+                if (sp.SameTextContent(this.prefixSpan, textBuffer))
                 {
                     this.PrefixIsWord = true;
                     break;
                 }
             }
         }
-
-        internal void FindBreak(WordVisitor visitor)
+        internal WordGroup GetSubGroup(WordVisitor visitor)
         {
-            //recursive
             char c = visitor.Char;
             if (!visitor.CanHandle(c))
             {
-                //if can' t handle this character
-                //then stop
-                int index = visitor.CurrentIndex;
-                visitor.AddWordBreakAt(index);
-                visitor.SetCurrentIndex(index);
-
+                //can't handle
+                //then no furtur sub group
                 visitor.State = VisitorState.OutOfRangeChar;
-                return;
+                return null;
             }
-            visitor.FoundWord = false;
+            //-----------------
+            //can handle 
             if (subGroups != null)
             {
-                int c_index = c - visitor.CurrentCustomDic.FirstChar;
-                WordGroup foundSubGroup = subGroups[c_index];
-                if (foundSubGroup != null)
-                {
-                    //found next group
-                    if (!visitor.IsEnd)
-                    {
-                        int index = visitor.CurrentIndex;
-                        visitor.SetCurrentIndex(index + 1);
-                        foundSubGroup.FindBreak(visitor);
-                        if (visitor.State == VisitorState.OutOfRangeChar)
-                        {
-                            return;
-                        }
-                        if (!visitor.FoundWord)
-                        {
-                            //not found in deeper level
-                            visitor.SetCurrentIndex(index);
-                        }
-                    }
-                    else
-                    {
+                return subGroups[c - visitor.CurrentCustomDic.FirstChar];
+            }
+            return null;
+        }
 
-                        if (foundSubGroup.PrefixIsWord)
+        internal int FindInUnIndexMember(WordVisitor visitor)
+        {
+            if (unIndexWordSpans == null)
+            {
+                throw new NotSupportedException();
+            }
+
+            //at this wordgroup
+            //no subground anymore
+            //so we should find the word one by one
+            //start at prefix
+            //and select the one that 
+
+            int readLen = visitor.CurrentIndex - visitor.LatestBreakAt;
+            int nwords = unIndexWordSpans.Count;
+            //only 1 that match 
+
+            TextBuffer currentTextBuffer = visitor.CurrentCustomDic.TextBuffer;
+
+            //we sort unindex string ***
+            //so we find from longest one( last) to begin 
+            for (int i = nwords - 1; i >= 0; --i)
+            {
+                //loop test on each word
+                WordSpan w = unIndexWordSpans[i];
+#if DEBUG
+                //string dbugstr = w.GetString(currentTextBuffer);
+#endif
+
+                int savedIndex = visitor.CurrentIndex;
+                char c = visitor.Char;
+                int wordLen = w.len;
+                int matchCharCount = 0;
+                if (wordLen > readLen)
+                {
+                    for (int p = readLen; p < wordLen; ++p)
+                    {
+                        char c2 = w.GetChar(p, currentTextBuffer);
+                        if (c2 == c)
                         {
-                            int savedIndex = visitor.CurrentIndex;
-                            int newBreakAt = visitor.LatestBreakAt + this.PrefixLen;
-                            visitor.SetCurrentIndex(newBreakAt);
-                            //check next char can be the char of new word or not
-                            //this depends on each lang 
-                            char canBeStartChar = visitor.Char;
-                            if (visitor.CanbeStartChar(canBeStartChar))
+                            matchCharCount++;
+                            //match 
+                            //read next
+                            if (!visitor.IsEnd)
                             {
-                                visitor.AddWordBreakAt(newBreakAt + 1);
-                                visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                                visitor.SetCurrentIndex(visitor.CurrentIndex + 1);
+                                c = visitor.Char;
                             }
                             else
                             {
-                                visitor.SetCurrentIndex(savedIndex);
+                                //no more data in visitor
+
+                                break;
                             }
-
                         }
-
+                        else
+                        {
+                            break;
+                        }
                     }
                 }
-            }
-            //-------
-            if (!visitor.FoundWord)
-            {
-
-
-                if (unIndexWordSpans != null)
+                //reset
+                if (readLen + matchCharCount == wordLen)
                 {
-                    //at this wordgroup
-                    //no subground anymore
-                    //so we should find the word one by one
-                    //start at prefix
-                    //and select the one that 
-                    int pos = visitor.CurrentIndex;
-                    int latestBreak = visitor.LatestBreakAt;
-                    int len = (pos - latestBreak);
-                    int n = unIndexWordSpans.Count;
-
-                    List<CandidateWord> candidateWords = visitor.GetTempCandidateWords();
-                    for (int i = 0; i < n; ++i)
+                    int newBreakAt = visitor.LatestBreakAt + wordLen;
+                    visitor.SetCurrentIndex(newBreakAt);
+                    //-------------------------------------------- 
+                    if (visitor.State == VisitorState.End)
                     {
-                        //begin new word
-                        WordSpan w = unIndexWordSpans[i];
-                        int savedIndex = visitor.CurrentIndex;
-                        c = visitor.Char;
-                        int wordLen = w.len;
-                        int matchCharCount = 0;
-                        if (wordLen > len)
-                        {
-                            //char[] wbuff = w.ToCharArray();
-                            ////check if this word match or not
-                            TextBuffer currentTextBuffer = visitor.CurrentCustomDic.TextBuffer;
-                            for (int p = len; p < wordLen; ++p)
-                            {
-                                char c2 = w.GetChar(p, currentTextBuffer);
-                                if (c2 == c)
-                                {
-                                    matchCharCount++;
-                                    //match 
-                                    //read next
-                                    if (!visitor.IsEnd)
-                                    {
-                                        visitor.SetCurrentIndex(visitor.CurrentIndex + 1);
-                                        c = visitor.Char;
-                                    }
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        //reset
-                        if (matchCharCount > 0)
-                        {
-                            CandidateWord candidate = new CandidateWord();
-                            candidate.w_index = i;
-                            candidate.w_len = wordLen;
-                            candidate.max_match = len + matchCharCount;
-                            if (candidate.IsFullMatch())
-                            {
-                                candidateWords.Add(candidate);
-                            }
-                        }
-                        visitor.SetCurrentIndex(savedIndex);
+                        return newBreakAt;
                     }
-
-                    if (candidateWords.Count == 1)
+                    //check next char can be the char of new word or not
+                    //this depends on each lang 
+                    char canBeStartChar = visitor.Char;
+                    if (visitor.CanHandle(canBeStartChar))
                     {
-                        CandidateWord candidate = candidateWords[0];
-
-                        int savedIndex = visitor.CurrentIndex;
-                        int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
-                        visitor.SetCurrentIndex(newBreakAt);
-                        //check next char can be the char of new word or not
-                        //this depends on each lang 
-                        char canBeStartChar = visitor.Char;
                         if (visitor.CanbeStartChar(canBeStartChar))
                         {
-                            visitor.AddWordBreakAt(newBreakAt);
-                            visitor.SetCurrentIndex(newBreakAt);
+                            return newBreakAt;
                         }
                         else
                         {
+                            //back to savedIndex
                             visitor.SetCurrentIndex(savedIndex);
+                            return savedIndex;
                         }
-
-
-                    }
-                    else if (candidateWords.Count > 0)
-                    {
-                        CandidateWord candidate = candidateWords[candidateWords.Count - 1];
-
-                        int savedIndex = visitor.CurrentIndex;
-                        int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
-                        visitor.SetCurrentIndex(newBreakAt);
-                        //check next char can be the char of new word or not
-                        //this depends on each lang 
-                        char canBeStartChar = visitor.Char;
-                        if (visitor.CanbeStartChar(canBeStartChar))
-                        {
-                            visitor.AddWordBreakAt(newBreakAt);
-                            visitor.SetCurrentIndex(newBreakAt);
-                        }
-                        else
-                        {
-                            visitor.SetCurrentIndex(savedIndex);
-                        }
-
-                        //visitor.AddWordBreakAt(
-                        //       visitor.LatestBreakAt + candidate.max_match);
-                        //visitor.SetCurrentIndex(visitor.LatestBreakAt);
-
-
                     }
                     else
                     {
-
+                        visitor.State = VisitorState.OutOfRangeChar;
+                        return newBreakAt;
                     }
                 }
-                if (!visitor.FoundWord)
-                {
-                    if (this.PrefixIsWord)
-                    {
-                        int savedIndex = visitor.CurrentIndex;
-                        int newBreakAt = visitor.LatestBreakAt + this.PrefixLen;
-                        visitor.SetCurrentIndex(newBreakAt);
-                        //check next char can be the char of new word or not
-                        //this depends on each lang 
-                        char canBeStartChar = visitor.Char;
-                        if (visitor.CanbeStartChar(canBeStartChar))
-                        {
-                            visitor.AddWordBreakAt(newBreakAt);
-                            visitor.SetCurrentIndex(newBreakAt);
-                        }
-                        else
-                        {
-                            visitor.SetCurrentIndex(savedIndex);
-                        }
-                    }
-                }
+                visitor.SetCurrentIndex(savedIndex);
             }
-            else
-            {
-
-
-                //if (unIndexMemberWords != null)
-                //{
-                //    //at this wordgroup
-                //    //no subground anymore
-                //    //so we should find the word one by one
-                //    //start at prefix
-                //    //and select the one that 
-
-                //}
-            }
-
+            return 0;
+            //int candidateCount;
+            //switch (candidateCount = candidateWords.Count)
+            //{
+            //    case 0: return 0;
+            //    case 1:
+            //        {
+            //            CandidateWord candidate = candidateWords[0];
+            //            int savedIndex = visitor.CurrentIndex;
+            //            int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
+            //            visitor.SetCurrentIndex(newBreakAt);
+            //            if (visitor.State == VisitorState.End)
+            //            {
+            //                return newBreakAt;
+            //            }
+            //            //check next char can be the char of new word or not
+            //            //this depends on each lang 
+            //            char canBeStartChar = visitor.Char;
+            //            if (visitor.CanHandle(canBeStartChar))
+            //            {
+            //                if (visitor.CanbeStartChar(canBeStartChar))
+            //                {
+            //                    return newBreakAt;
+            //                }
+            //                else
+            //                {
+            //                    //back to savedIndex
+            //                    visitor.SetCurrentIndex(savedIndex);
+            //                    return savedIndex;
+            //                }
+            //            }
+            //            else
+            //            {
+            //                visitor.State = VisitorState.OutOfRangeChar;
+            //                return visitor.CurrentIndex;
+            //            }
+            //        }
+            //    default:
+            //        {
+            //            throw new NotSupportedException();
+            //            //for (int cn = 0; cn < candidateCount; ++cn)
+            //            //{
+            //            //    CandidateWord candidate = candidateWords[cn];
+            //            //    int savedIndex = visitor.CurrentIndex;
+            //            //    int newBreakAt = visitor.LatestBreakAt + candidate.max_match;
+            //            //    visitor.SetCurrentIndex(newBreakAt);
+            //            //    if (visitor.State == VisitorState.End)
+            //            //    {
+            //            //        return newBreakAt;
+            //            //    }
+            //            //    //check next char can be the char of new word or not
+            //            //    //this depends on each lang 
+            //            //    char canBeStartChar = visitor.Char;
+            //            //    if (visitor.CanHandle(canBeStartChar))
+            //            //    {
+            //            //        if (visitor.CanbeStartChar(canBeStartChar))
+            //            //        {
+            //            //            return newBreakAt;
+            //            //        }
+            //            //        else
+            //            //        {
+            //            //            //back to savedIndex
+            //            //            visitor.SetCurrentIndex(savedIndex);
+            //            //            return savedIndex;
+            //            //        }
+            //            //    }
+            //            //    else
+            //            //    {
+            //            //        visitor.State = VisitorState.OutOfRangeChar;
+            //            //        return visitor.CurrentIndex;
+            //            //    }
+            //            //} 
+            //        }
+            //}
         }
 
 #if DEBUG
