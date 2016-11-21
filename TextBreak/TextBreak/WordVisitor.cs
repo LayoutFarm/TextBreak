@@ -76,9 +76,6 @@ namespace LayoutFarm.TextBreak
 
         public void AddWordBreakAt(int index)
         {
-            if (index == 9)
-            {
-            }
 
 #if DEBUG
             if (index == latestBreakAt)

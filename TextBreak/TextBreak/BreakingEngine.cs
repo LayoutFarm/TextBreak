@@ -38,9 +38,7 @@ namespace LayoutFarm.TextBreak
             {
                 //find proper start words;
                 char c = charBuff[i];
-                if (c == 'ใ')
-                {
-                }
+
                 //----------------------
                 //check if c is in our responsiblity
                 if (c < c_first || c > c_last)
@@ -60,55 +58,140 @@ namespace LayoutFarm.TextBreak
                 }
                 else
                 {
-                    //we found word group for c
-                    int prevIndex = i;                    
-                    //move to next char
-                    visitor.SetCurrentIndex(i + 1);
-
-                    //find break 
-                    wordgroup.FindBreak(visitor);
-
-
-
-
-                    if (visitor.State == VisitorState.OutOfRangeChar)
+                    //check if we can move next
+                    if (visitor.IsEnd)
                     {
                         return;
                     }
-                    else if (visitor.State == VisitorState.End)
+                    //---------------------
+                    WordGroup c_wordgroup = wordgroup;
+                    Stack<WordGroup> candidate1 = new Stack<WordGroup>();
+                    Stack<int> candidate2 = new Stack<int>();
+                    int candidateLen = 1;
+                    if (c_wordgroup.PrefixIsWord)
                     {
-                        return;
+                        candidate1.Push(c_wordgroup);
+                        candidate2.Push(candidateLen);
                     }
 
-                    i = visitor.LatestBreakAt;
-                    if (prevIndex == i)
+                    bool contRead = true;
+                    while (contRead)
                     {
-                        if (visitor.CurrentIndex >= len - 1)
+                        visitor.FoundWord = false;
+                        //not end
+                        //then move next
+                        candidateLen++;
+                        visitor.SetCurrentIndex(i + 1);
+                        WordGroup next = c_wordgroup.GetSubGroup(visitor);
+                        //debug
+                        string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);
+
+                        if (next == null)
                         {
-                            //the last one 
-                            visitor.State = VisitorState.End;
-                            break;
-                        }
-                        else
-                        {
-                            //current char is not found in dic
-                            //check if it can stand alone or not 
-                            if (!visitor.CanbeStartChar(visitor.Char))
+                            //no deeper group
+                            //then check if 
+                            if (c_wordgroup.UnIndexMemberCount > 0)
                             {
-                                //if not
-                                //save it in this group
-                                i++;
-                                i++;
-                                visitor.AddWordBreakAt(i);
-                                visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                                visitor.FoundWord = false;
+                                int pre = visitor.CurrentIndex;
+                                int n = c_wordgroup.FindInUnIndexMember(visitor);
+                                if (n - pre > 0)
+                                //if (n > 0)
+                                {
+                                    visitor.AddWordBreakAt(n);
+                                    visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                                }
+                                else
+                                {
+                                    //on the same pos
+                                    if (visitor.State == VisitorState.OutOfRangeChar)
+                                    {
+                                        return;
+                                    }
+                                    else
+                                    {
+                                        bool foundCandidate = false;
+                                        while (candidate2.Count > 0)
+                                        {
+                                            int candi1 = candidate2.Pop();
+                                            //try
+                                            visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
+                                            //check if we can use this candidate
+                                            char next_char = visitor.Char;
+                                            if (visitor.CanbeStartChar(next_char))
+                                            {
+                                                //use this
+                                                //use this candidate if possible
+                                                visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                                foundCandidate = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!foundCandidate)
+                                        {
+
+                                        }
+
+                                    }
+                                }
+                                contRead = false;
                             }
                             else
                             {
-                                i++;
-                                visitor.AddWordBreakAt(i);
-                                visitor.SetCurrentIndex(visitor.LatestBreakAt);
-                            }
+                                if (!visitor.FoundWord)
+                                {
 
+                                    bool foundCandidate = false;
+                                    while (candidate2.Count > 0)
+                                    {
+                                        int candi1 = candidate2.Pop();
+                                        //try
+                                        visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
+                                        //check if we can use this candidate
+                                        char next_char = visitor.Char;
+                                        if (!visitor.CanHandle(next_char))
+                                        {
+                                            //use this
+                                            //use this candidate if possible
+                                            visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                            foundCandidate = true;
+                                            break;
+                                        }
+
+                                        if (visitor.CanbeStartChar(next_char))
+                                        {
+                                            //use this
+                                            //use this candidate if possible
+                                            visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                            foundCandidate = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!foundCandidate)
+                                    {
+
+                                    }
+                                }
+                                else
+                                {
+                                    //found
+                                    visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                    visitor.SetCurrentIndex(visitor.LatestBreakAt);
+                                }
+
+                                contRead = false;
+                            }
+                            i = visitor.CurrentIndex;
+                        }
+                        else
+                        {
+                            if (next.PrefixIsWord)
+                            {
+                                candidate1.Push(c_wordgroup);
+                                candidate2.Push(candidateLen);
+                            }
+                            c_wordgroup = next;
+                            i = visitor.CurrentIndex;
                         }
                     }
                 }
@@ -117,8 +200,7 @@ namespace LayoutFarm.TextBreak
             if (visitor.CurrentIndex >= len - 1)
             {
                 //the last one 
-                visitor.State = VisitorState.End;
-
+                visitor.State = VisitorState.End; 
             }
         }
     }
