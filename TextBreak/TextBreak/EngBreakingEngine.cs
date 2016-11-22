@@ -139,6 +139,7 @@ namespace LayoutFarm.TextBreak
 
                                 //we not collect punc
                                 onbreak(breakBounds);
+                                breakBounds.startIndex += 1;
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 continue;
@@ -194,7 +195,7 @@ namespace LayoutFarm.TextBreak
                 }
 
             }
-            if (breakBounds.startIndex < (start + len) - 1)
+            if (breakBounds.startIndex < start + len)
             {
                 //some remaining data
                 breakBounds.length = (start + len) - breakBounds.startIndex;
