@@ -124,7 +124,14 @@ namespace LayoutFarm.TextBreak
                                 lexState = LexState.Number;
 
                             }
-                            else if (char.IsPunctuation(c))
+                            else if (char.IsWhiteSpace(c))
+                            {
+                                //we collect whitespace
+                                breakBounds.startIndex = i;
+                                breakBounds.kind = WorkKind.Whitespace;
+                                lexState = LexState.Whitespace;
+                            }
+                            else if (char.IsPunctuation(c) || char.IsSymbol(c))
                             {
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
@@ -135,13 +142,6 @@ namespace LayoutFarm.TextBreak
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 continue;
-                            }
-                            else if (char.IsWhiteSpace(c))
-                            {
-                                //we collect whitespace
-                                breakBounds.startIndex = i;
-                                breakBounds.kind = WorkKind.Whitespace;
-                                lexState = LexState.Whitespace;
                             }
                             else
                             {
@@ -194,7 +194,7 @@ namespace LayoutFarm.TextBreak
                 }
 
             }
-            if (breakBounds.startIndex < start + len)
+            if (breakBounds.startIndex < (start + len) - 1)
             {
                 //some remaining data
                 breakBounds.length = (start + len) - breakBounds.startIndex;
