@@ -30,7 +30,7 @@ namespace LayoutFarm.TextBreak
         int latestBreakAt;
 
         Stack<int> tempCandidateBreaks = new Stack<int>();
-        Stack<WordGroup> tempWordGroups = new Stack<WordGroup>();
+      
 
         public WordVisitor(CustomBreaker ownerBreak)
         {
@@ -105,10 +105,7 @@ namespace LayoutFarm.TextBreak
         {
             return this.tempCandidateBreaks;
         }
-        internal Stack<WordGroup> GetTempWordGroups()
-        {
-            return this.tempWordGroups;
-        }
+       
 
     }
 
