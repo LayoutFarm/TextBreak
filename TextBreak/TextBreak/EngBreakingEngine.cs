@@ -3,10 +3,7 @@
 // © 2016 and later: Unicode, Inc. and others.
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+ 
 
 namespace LayoutFarm.TextBreak
 {
@@ -124,7 +121,14 @@ namespace LayoutFarm.TextBreak
                                 lexState = LexState.Number;
 
                             }
-                            else if (char.IsPunctuation(c))
+                            else if (char.IsWhiteSpace(c))
+                            {
+                                //we collect whitespace
+                                breakBounds.startIndex = i;
+                                breakBounds.kind = WorkKind.Whitespace;
+                                lexState = LexState.Whitespace;
+                            }
+                            else if (char.IsPunctuation(c) || char.IsSymbol(c))
                             {
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
@@ -132,16 +136,10 @@ namespace LayoutFarm.TextBreak
 
                                 //we not collect punc
                                 onbreak(breakBounds);
+                                breakBounds.startIndex += 1;
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 continue;
-                            }
-                            else if (char.IsWhiteSpace(c))
-                            {
-                                //we collect whitespace
-                                breakBounds.startIndex = i;
-                                breakBounds.kind = WorkKind.Whitespace;
-                                lexState = LexState.Whitespace;
                             }
                             else
                             {

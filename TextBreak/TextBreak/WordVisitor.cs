@@ -4,9 +4,7 @@
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using System.Collections.Generic; 
 
 namespace LayoutFarm.TextBreak
 {
@@ -30,6 +28,7 @@ namespace LayoutFarm.TextBreak
         int latestBreakAt;
 
         Stack<int> tempCandidateBreaks = new Stack<int>();
+      
 
         public WordVisitor(CustomBreaker ownerBreak)
         {
@@ -57,16 +56,7 @@ namespace LayoutFarm.TextBreak
         {
             get { return currentChar; }
         }
-        public bool ReadNext()
-        {
-            if (currentIndex < bufferLen + 1)
-            {
-                currentIndex++;
-                currentChar = buffer[currentIndex];
-                return true;
-            }
-            return false;
-        }
+
 
         public bool IsEnd
         {
@@ -76,7 +66,7 @@ namespace LayoutFarm.TextBreak
 
         public void AddWordBreakAt(int index)
         {
-
+         
 #if DEBUG
             if (index == latestBreakAt)
             {
@@ -95,22 +85,15 @@ namespace LayoutFarm.TextBreak
             this.currentIndex = index;
             if (index < buffer.Length)
             {
-                this.currentChar = buffer[index];
+                currentChar = buffer[index];
             }
             else
             {
+                 
                 this.State = VisitorState.End;
             }
         }
-        public bool CanbeStartChar(char c)
-        {
-            return ownerBreak.CanBeStartChar(c);
-        }
-        public bool CanHandle(char c)
-        {
-            CustomDic dic = CurrentCustomDic;
-            return c >= dic.FirstChar && c <= dic.LastChar;
-        }
+
         public List<int> GetBreakList()
         {
             return breakAtList;
@@ -120,11 +103,8 @@ namespace LayoutFarm.TextBreak
         {
             return this.tempCandidateBreaks;
         }
-        internal CustomDic CurrentCustomDic
-        {
-            get;
-            set;
-        }
+       
+
     }
 
 }
