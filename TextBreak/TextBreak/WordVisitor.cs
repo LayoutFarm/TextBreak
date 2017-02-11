@@ -4,7 +4,7 @@
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace LayoutFarm.TextBreak
 {
@@ -28,7 +28,7 @@ namespace LayoutFarm.TextBreak
         int latestBreakAt;
 
         Stack<int> tempCandidateBreaks = new Stack<int>();
-      
+
 
         public WordVisitor(CustomBreaker ownerBreak)
         {
@@ -66,7 +66,7 @@ namespace LayoutFarm.TextBreak
 
         public void AddWordBreakAt(int index)
         {
-         
+
 #if DEBUG
             if (index == latestBreakAt)
             {
@@ -89,7 +89,8 @@ namespace LayoutFarm.TextBreak
             }
             else
             {
-                 
+                //can't read next
+                //the set state= end
                 this.State = VisitorState.End;
             }
         }
@@ -103,7 +104,7 @@ namespace LayoutFarm.TextBreak
         {
             return this.tempCandidateBreaks;
         }
-       
+
 
     }
 

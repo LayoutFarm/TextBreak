@@ -4,7 +4,7 @@
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace LayoutFarm.TextBreak
 {
@@ -35,7 +35,7 @@ namespace LayoutFarm.TextBreak
 
             Stack<int> candidate = visitor.GetTempCandidateBreaks();
 
-            for (int i = startAt; i < endAt; )
+            for (int i = startAt; i < endAt;)
             {
                 //find proper start words;
                 char c = charBuff[i];
@@ -85,7 +85,11 @@ namespace LayoutFarm.TextBreak
                         //then move next
                         candidateLen++;
                         visitor.SetCurrentIndex(i + 1);
-
+                        if (visitor.IsEnd)
+                        {
+                            //end  
+                             
+                        }
                         WordGroup next = GetSubGroup(visitor, c_wordgroup);
                         //for debug
                         //string prefix = (next == null) ? "" : next.GetPrefix(CurrentCustomDic.TextBuffer);  
@@ -98,6 +102,40 @@ namespace LayoutFarm.TextBreak
                             }
                             c_wordgroup = next;
                             i = visitor.CurrentIndex;
+
+                            if (visitor.IsEnd)
+                            {
+                                i = endAt; //temp fix, TODO: review here
+                                bool foundCandidate = false;
+                                //choose best match 
+                                while (candidate.Count > 0)
+                                {
+
+                                    int candi1 = candidate.Pop();
+                                    //try
+                                    visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
+                                    if (visitor.State != VisitorState.End)
+                                    {
+                                        char next_char = visitor.Char;
+                                        if (CanBeStartChar(next_char))
+                                        {
+                                            //use this
+                                            //use this candidate if possible
+                                            visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                            foundCandidate = true;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                        foundCandidate = true;
+                                        break;
+                                    }
+                                }
+
+                                continueRead = false;
+                            }
                         }
                         else
                         {
@@ -131,15 +169,24 @@ namespace LayoutFarm.TextBreak
                                             //try
                                             visitor.SetCurrentIndex(visitor.LatestBreakAt + candi1);
                                             //check if we can use this candidate
-                                            char next_char = visitor.Char;
-                                            if (CanBeStartChar(next_char))
+                                            if (visitor.State != VisitorState.End)
                                             {
-                                                //use this
-                                                //use this candidate if possible
+                                                char next_char = visitor.Char;
+                                                if (CanBeStartChar(next_char))
+                                                {
+                                                    //use this
+                                                    //use this candidate if possible
+                                                    visitor.AddWordBreakAt(visitor.CurrentIndex);
+                                                    foundCandidate = true;
+                                                    break;
+                                                }
+                                            }
+                                            else
+                                            {
                                                 visitor.AddWordBreakAt(visitor.CurrentIndex);
                                                 foundCandidate = true;
-                                                break;
                                             }
+
                                         }
                                         if (!foundCandidate)
                                         {
