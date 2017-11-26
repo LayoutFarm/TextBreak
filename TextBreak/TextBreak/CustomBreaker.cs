@@ -4,7 +4,7 @@
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
 using System;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 namespace LayoutFarm.TextBreak
 {
@@ -62,7 +62,7 @@ namespace LayoutFarm.TextBreak
             BreakingEngine currentEngine = breakingEngine = SelectEngine(charBuff[startAt]);
             //----------------------------------------
             //select breaking engine
-            for (; ; )
+            for (;;)
             {
                 //----------------------------------------
                 currentEngine.BreakWord(visitor, charBuff, startAt, charBuff.Length - startAt);
@@ -92,7 +92,7 @@ namespace LayoutFarm.TextBreak
                 }
             }
         }
-       
+
         public void BreakWords(string inputstr)
         {
             BreakWords(inputstr.ToCharArray(), 0);
@@ -105,7 +105,11 @@ namespace LayoutFarm.TextBreak
         {
             return breakingEngine.CanBeStartChar(c);
         }
-      
+
+        public int BreakAtCount
+        {
+            get { return visitor.GetBreakList().Count; }
+        }
         public IEnumerable<BreakSpan> GetBreakSpanIter()
         {
             List<int> breakAtList = visitor.GetBreakList();

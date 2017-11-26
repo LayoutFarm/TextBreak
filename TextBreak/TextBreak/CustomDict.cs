@@ -120,7 +120,8 @@ namespace LayoutFarm.TextBreak
                 //in range 
                 WordGroup found = this.wordGroups[TransformCharToIndex(startWithChar)];
                 if (found != null)
-                {//iterate and collect into 
+                {
+                    //iterate and collect into 
                     found.CollectAllWords(this.textBuffer, output);
                 }
             }
@@ -527,12 +528,12 @@ namespace LayoutFarm.TextBreak
             }
         }
 
-       
+
 
         internal WordSpan[] GetWordSpans() { return wordSpans; }
         internal WordGroup[] GetSubGroups() { return subGroups; }
 
-     
+
 
 #if DEBUG
         public override string ToString()
