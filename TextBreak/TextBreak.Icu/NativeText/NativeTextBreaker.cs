@@ -7,7 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices; 
-namespace LayoutFarm.TextBreak.ICU
+namespace Typography.TextBreak.ICU
 {
     static class NativeTextBreakerLib
     {

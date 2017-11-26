@@ -5,8 +5,8 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using LayoutFarm.TextBreak;
-using LayoutFarm.TextBreak.ICU;
+using Typography.TextBreak;
+using Typography.TextBreak.ICU;
 
 namespace TextBreakerTest
 {
@@ -54,7 +54,7 @@ namespace TextBreakerTest
             //
 
             string icu_dataFile = @"../../icudt57l.dat";
-            LayoutFarm.TextBreak.ICU.NativeTextBreaker.SetICUDataFile(icu_dataFile);
+            Typography.TextBreak.ICU.NativeTextBreaker.SetICUDataFile(icu_dataFile);
             icuLoaded = true;
         }
 
@@ -64,7 +64,7 @@ namespace TextBreakerTest
 
             if (nativeTextBreak == null)
             {
-                nativeTextBreak = new NativeTextBreaker(LayoutFarm.TextBreak.ICU.TextBreakKind.Word, currentLocale);
+                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, currentLocale);
             }
 
             char[] textBuffer = this.textBox1.Text.ToCharArray();
@@ -143,7 +143,7 @@ namespace TextBreakerTest
             //-------------------
             if (nativeTextBreak == null)
             {
-                nativeTextBreak = new NativeTextBreaker(LayoutFarm.TextBreak.ICU.TextBreakKind.Word, currentLocale);
+                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, currentLocale);
             }
 
             char[] textBuffer = this.textBox1.Text.ToCharArray();

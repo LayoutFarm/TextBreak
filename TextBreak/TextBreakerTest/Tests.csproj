@@ -72,13 +72,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LayoutFarm.TextBreak.Icu\LayoutFarm.TextBreak.Icu.csproj">
-      <Project>{777178CA-C706-406F-856D-62CC40AC63E4}</Project>
-      <Name>LayoutFarm.TextBreak.Icu</Name>
+    <ProjectReference Include="..\TextBreak.Icu\TextBreak.Icu.csproj">
+      <Project>{777178ca-c706-406f-856d-62cc40ac63e4}</Project>
+      <Name>TextBreak.Icu</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TextBreak\LayoutFarm.TextBreak.csproj">
-      <Project>{09EC5531-D272-40DB-87A4-B2D353846CC2}</Project>
-      <Name>LayoutFarm.TextBreak</Name>
+    <ProjectReference Include="..\Typography.TextBreak\Typography.TextBreak.csproj">
+      <Project>{09ec5531-d272-40db-87a4-b2d353846cc2}</Project>
+      <Name>Typography.TextBreak</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

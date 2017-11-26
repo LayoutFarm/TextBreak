@@ -1,7 +1,7 @@
 ﻿//MIT, 2014-2016, WinterDev
 
  
-namespace LayoutFarm.TextBreak.ICU
+namespace Typography.TextBreak.ICU
 {
 
     public enum TextBreakKind

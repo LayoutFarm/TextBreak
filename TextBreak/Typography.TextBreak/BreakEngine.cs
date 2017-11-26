@@ -1,7 +1,7 @@
-﻿//MIT, 2016, WinterDev
+﻿//MIT, 2016-2017, WinterDev
 //some code from ICU project with BSD license
 
-namespace LayoutFarm.TextBreak
+namespace Typography.TextBreak
 {
     public enum TextBreakKind
     {
