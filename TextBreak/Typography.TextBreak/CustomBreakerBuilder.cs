@@ -20,8 +20,7 @@ namespace Typography.TextBreak
                 thaiDicBreakingEngine = new ThaiDictionaryBreakingEngine();
                 thaiDicBreakingEngine.SetDictionaryData(customDic);//add customdic to the breaker
                 customDic.SetCharRange(thaiDicBreakingEngine.FirstUnicodeChar, thaiDicBreakingEngine.LastUnicodeChar);
-                customDic.LoadFromTextfile(DataDir + "/thaidict.txt");
-                //customDic.LoadFromTextfile(DataDir + "/thaidict_testonly.txt");
+                customDic.LoadFromTextfile(DataDir + "/thaidict.txt"); 
             }
             if (laoDicBreakingEngine == null)
             {
