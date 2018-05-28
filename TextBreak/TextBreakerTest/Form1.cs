@@ -44,7 +44,7 @@ namespace TextBreakerTest
         {
             if (icuLoaded) return;
             // 
-            string icu_dataFile = @"../../icudt57l.dat";
+            string icu_dataFile = @"icudt57l.dat";
             if (!File.Exists(icu_dataFile))
             {
 
