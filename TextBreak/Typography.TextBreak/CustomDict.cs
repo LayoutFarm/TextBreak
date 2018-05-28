@@ -27,6 +27,8 @@ namespace Typography.TextBreak
         }
         public char FirstChar { get { return firstChar; } }
         public char LastChar { get { return lastChar; } }
+
+
         public void LoadFromTextfile(string filename)
         {
             //once only            
@@ -49,8 +51,8 @@ namespace Typography.TextBreak
                 string line = reader.ReadLine();
                 while (line != null)
                 {
-                    line = line.Trim();
-                    char[] lineBuffer = line.ToCharArray();
+                    
+                    char[] lineBuffer = line.Trim().ToCharArray();
                     int lineLen = lineBuffer.Length;
                     char c0;
                     if (lineLen > 0 && (c0 = lineBuffer[0]) != '#')
@@ -169,8 +171,7 @@ namespace Typography.TextBreak
                 }
                 return true;
             }
-            return false;
-            //return this.startAt == another.startAt && this.len == another.len;
+            return false; 
         }
     }
 

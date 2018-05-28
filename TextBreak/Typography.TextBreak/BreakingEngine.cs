@@ -27,13 +27,7 @@ namespace Typography.TextBreak
         protected abstract WordGroup GetWordGroupForFirstChar(char c);
 
 
-        void FindWord(WordGroup wordgroup)
-        {
-            char c_first = this.FirstUnicodeChar;
-            char c_last = this.LastUnicodeChar;
-
-
-        }
+        
         int _startAt;
         int _len;
         int _endAt;
