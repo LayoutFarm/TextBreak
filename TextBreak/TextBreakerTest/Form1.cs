@@ -37,6 +37,8 @@ namespace TextBreakerTest
             //----------------
             this.textBox1.Text = test1;
 
+            //-------
+            CustomBreakerBuilder.Setup("../../../icu61/brkitr/dictionaries");
         }
 
         static bool icuLoaded;
@@ -80,7 +82,7 @@ namespace TextBreakerTest
             //we use dic data from icu-project
 
             //1. create dictionary based breaking engine 
-            CustomBreakerBuilder.Setup("../../../icu58/brkitr/dictionaries");
+            
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
 
             char[] test = this.textBox1.Text.ToCharArray();
