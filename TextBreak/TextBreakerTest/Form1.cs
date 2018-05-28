@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
+﻿//MIT, 2016-2017, WinterDev
+using System;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -17,43 +15,42 @@ namespace TextBreakerTest
             InitializeComponent();
         }
 
-        private void cmdReadDict_Click(object sender, EventArgs e)
-        {
-
-            // LayoutFarm.TextBreaker.ICU.DictionaryData.LoadData("../../../icu58/brkitr/thaidict.dict");
-        }
-
-
-        string currentLocale = "th-TH";
+        string icu_currentLocale = "th-TH";
         private void Form1_Load(object sender, EventArgs e)
         {
             InitIcuLib();
             //thai
             //currentLocale = "th-TH";
             //string test1 = "ผู้ใหญ่บหาผ้าใหม่ให้สะใภ้ใช้คล้องคอใฝ่ใจเอาใส่ห่อมิหลงใหลใครขอดูจะใคร่ลงเรือใบดูน้ำใสและปลาปูสิ่งใดอยู่ในตู้มิใช่อยู่ใต้ตั่งเตียงบ้าใบถือใยบัวหูตามัวมาให้เคียงเล่าเท่าอย่าละเลี่ยงยี่สิบม้วนจำจงดี";
-            string test1 = "ขาย =";
+            // string test1 = "ขาย =";
             //string test1 = "แป้นพิมลาว";            
             //string test1 = "ผ้าใหม่";
             //string test1 = "ประ";
-            
+
             //----------------
             //
             //lao
-            //currentLocale = "lo-LA";
-            //string test1 = "ແປ້ນພິມລາວ";
+            icu_currentLocale = "lo-LA";
+            //string test1 = "ສະບາຍດີແປ້ນພິມລາວ";
             //string test1 = "ສາທາລະນະລັດ ປະຊາທິປະໄຕ ປະຊາຊົນລາວ";
+            string test1 = "ABCD1234567890ສາທາລະນະລັດ ປະຊາທິປະໄຕ ປະຊາຊົນລາວ ผู้ใหญ่หาผ้าใหม่";
             //----------------
             this.textBox1.Text = test1;
 
+            //-------
+            CustomBreakerBuilder.Setup("../../../icu61/brkitr/dictionaries");
         }
 
         static bool icuLoaded;
         static void InitIcuLib()
         {
             if (icuLoaded) return;
-            //
+            // 
+            string icu_dataFile = @"icudt57l.dat";
+            if (!File.Exists(icu_dataFile))
+            {
 
-            string icu_dataFile = @"../../icudt57l.dat";
+            }
             Typography.TextBreak.ICU.NativeTextBreaker.SetICUDataFile(icu_dataFile);
             icuLoaded = true;
         }
@@ -64,7 +61,7 @@ namespace TextBreakerTest
 
             if (nativeTextBreak == null)
             {
-                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, currentLocale);
+                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, icu_currentLocale);
             }
 
             char[] textBuffer = this.textBox1.Text.ToCharArray();
@@ -81,19 +78,53 @@ namespace TextBreakerTest
         private void cmdManaged_Click(object sender, EventArgs e)
         {
 
-            CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries";
+            //some lang eg. Thai, Lao, need dictionary breaking
+            //we use dic data from icu-project
+
+            //1. create dictionary based breaking engine 
+            
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
-            //2. create dictionary based breaking engine 
-            // 
+
             char[] test = this.textBox1.Text.ToCharArray();
             this.listBox1.Items.Clear();
-            breaker1.BreakWords(test, 0);
-            foreach (var span in breaker1.GetBreakSpanIter())
+
+
+            breaker1.BreakWords(test, 0, test.Length);
+            foreach (BreakSpan span in breaker1.GetBreakSpanIter())
             {
                 string s = new string(test, span.startAt, span.len);
                 this.listBox1.Items.Add(span.startAt + " " + s);
             }
-
+        }
+        static bool StringStartsWithChars(string srcString, string value)
+        {
+            int findingLen = value.Length;
+            if (findingLen > srcString.Length)
+            {
+                return false;
+            }
+            //
+            unsafe
+            {
+                fixed (char* srcStringBuff = srcString)
+                fixed (char* findingChar = value)
+                {
+                    char* srcBuff1 = srcStringBuff;
+                    char* findChar1 = findingChar;
+                    for (int i = 0; i < findingLen; ++i)
+                    {
+                        //compare by values
+                        if (*srcBuff1 != *findChar1)
+                        {
+                            return false;
+                        }
+                        srcBuff1++;
+                        findChar1++;
+                    }
+                    //MATCH all
+                    return true;
+                }
+            }
         }
         private void cmdPerformace1_Click(object sender, EventArgs e)
         {
@@ -124,13 +155,13 @@ namespace TextBreakerTest
         {
 
             //-------------------
-            CustomBreakerBuilder.DataDir = "../../../icu58/brkitr_src/dictionaries";
+            CustomBreakerBuilder.Setup("../../../icu58/brkitr/dictionaries");
             CustomBreaker breaker1 = CustomBreakerBuilder.NewCustomBreaker();
             char[] test = this.textBox1.Text.ToCharArray();
             //-------------
             for (int i = ntimes - 1; i >= 0; --i)
             {
-                breaker1.BreakWords(test, 0);
+                breaker1.BreakWords(test, 0, test.Length);
                 foreach (var span in breaker1.GetBreakSpanIter())
                 {
 
@@ -143,7 +174,7 @@ namespace TextBreakerTest
             //-------------------
             if (nativeTextBreak == null)
             {
-                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, currentLocale);
+                nativeTextBreak = new NativeTextBreaker(Typography.TextBreak.ICU.TextBreakKind.Word, icu_currentLocale);
             }
 
             char[] textBuffer = this.textBox1.Text.ToCharArray();

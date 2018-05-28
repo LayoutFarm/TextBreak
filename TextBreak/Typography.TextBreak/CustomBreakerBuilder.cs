@@ -2,7 +2,7 @@
 // some code from icu-project
 // © 2016 and later: Unicode, Inc. and others.
 // License & terms of use: http://www.unicode.org/copyright.html#License
- 
+
 
 namespace Typography.TextBreak
 {
@@ -20,8 +20,7 @@ namespace Typography.TextBreak
                 thaiDicBreakingEngine = new ThaiDictionaryBreakingEngine();
                 thaiDicBreakingEngine.SetDictionaryData(customDic);//add customdic to the breaker
                 customDic.SetCharRange(thaiDicBreakingEngine.FirstUnicodeChar, thaiDicBreakingEngine.LastUnicodeChar);
-                customDic.LoadFromTextfile(DataDir + "/thaidict.txt");
-                //customDic.LoadFromTextfile(DataDir + "/thaidict_testonly.txt");
+                customDic.LoadFromTextfile(DataDir + "/thaidict.txt"); 
             }
             if (laoDicBreakingEngine == null)
             {
@@ -32,10 +31,20 @@ namespace Typography.TextBreak
                 customDic.LoadFromTextfile(DataDir + "/laodict.txt");
             }
         }
-        public static string DataDir
+
+        static string DataDir
         {
             get;
             set;
+        }
+        public static void Setup(string dataDir)
+        {
+            if (isInit) return;
+
+            DataDir = dataDir;
+            InitAllDics();
+
+            isInit = true;
         }
         public static CustomBreaker NewCustomBreaker()
         {
