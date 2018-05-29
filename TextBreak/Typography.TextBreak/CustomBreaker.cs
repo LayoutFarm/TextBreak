@@ -29,7 +29,8 @@ namespace Typography.TextBreak
             otherEngines.Add(engine);
             breakingEngine = engine;
         }
-        BreakingEngine SelectEngine(char c)
+
+        protected BreakingEngine SelectEngine(char c)
         {
             if (breakingEngine.CanHandle(c))
             {
@@ -146,6 +147,9 @@ namespace Typography.TextBreak
                 yield return sp;
             }
         }
+
+
+        //
     }
 
 
