@@ -11,10 +11,10 @@ namespace Typography.TextBreak
         public int startIndex;
         public int length;
         public bool stopNext;
-        public WorkKind kind;
+        public WordKind kind;
     }
 
-    enum WorkKind : byte
+    enum WordKind : byte
     {
         Whitespace,
         NewLine,

@@ -81,7 +81,7 @@ namespace Typography.TextBreak
                                         //this is '\r\n' linebreak
                                         breakBounds.startIndex = i;
                                         breakBounds.length = 2;
-                                        breakBounds.kind = WorkKind.NewLine;
+                                        breakBounds.kind = WordKind.NewLine;
                                         //
                                         onBreak(breakBounds);
                                         //
@@ -104,7 +104,7 @@ namespace Typography.TextBreak
                             {
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
-                                breakBounds.kind = WorkKind.NewLine;
+                                breakBounds.kind = WordKind.NewLine;
                                 //
                                 onBreak(breakBounds);
                                 //
@@ -116,13 +116,13 @@ namespace Typography.TextBreak
                             {
                                 //just collect
                                 breakBounds.startIndex = i;
-                                breakBounds.kind = WorkKind.Text;
+                                breakBounds.kind = WordKind.Text;
                                 lexState = LexState.Text;
                             }
                             else if (char.IsNumber(c))
                             {
                                 breakBounds.startIndex = i;
-                                breakBounds.kind = WorkKind.Number;
+                                breakBounds.kind = WordKind.Number;
                                 lexState = LexState.Number;
 
                             }
@@ -130,7 +130,7 @@ namespace Typography.TextBreak
                             {
                                 //we collect whitespace
                                 breakBounds.startIndex = i;
-                                breakBounds.kind = WorkKind.Whitespace;
+                                breakBounds.kind = WordKind.Whitespace;
                                 lexState = LexState.Whitespace;
                             }
                             else if (char.IsPunctuation(c) || char.IsSymbol(c))
@@ -144,7 +144,7 @@ namespace Typography.TextBreak
                                        char.IsNumber(input[i + 1]))
                                     {
                                         breakBounds.startIndex = i;
-                                        breakBounds.kind = WorkKind.Number;
+                                        breakBounds.kind = WordKind.Number;
                                         lexState = LexState.Number;
                                         continue;
                                     }
@@ -152,7 +152,7 @@ namespace Typography.TextBreak
 
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
-                                breakBounds.kind = WorkKind.Punc;
+                                breakBounds.kind = WordKind.Punc;
 
                                 //we not collect punc
                                 onBreak(breakBounds);
@@ -178,6 +178,7 @@ namespace Typography.TextBreak
 
                                 //flush current state 
                                 breakBounds.length = i - breakBounds.startIndex;
+                                breakBounds.kind = WordKind.Number;
                                 //
                                 onBreak(breakBounds);
                                 //
@@ -193,6 +194,7 @@ namespace Typography.TextBreak
                             {
                                 //flush
                                 breakBounds.length = i - breakBounds.startIndex;
+                                breakBounds.kind = WordKind.Text;
                                 //
                                 onBreak(breakBounds);
                                 //
@@ -207,6 +209,7 @@ namespace Typography.TextBreak
                             if (!char.IsWhiteSpace(c))
                             {
                                 breakBounds.length = i - breakBounds.startIndex;
+                                breakBounds.kind = WordKind.Whitespace;
                                 //
                                 onBreak(breakBounds);
                                 //
@@ -224,6 +227,7 @@ namespace Typography.TextBreak
                 breakBounds.startIndex < start + len)
             {
                 //some remaining data
+                
                 breakBounds.length = (start + len) - breakBounds.startIndex;
                 //
                 onBreak(breakBounds);
