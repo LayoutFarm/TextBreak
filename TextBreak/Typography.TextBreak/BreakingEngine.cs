@@ -197,7 +197,6 @@ namespace Typography.TextBreak
                                         break;
                                     }
                                 }
-
                                 continueRead = false;
                             }
                         }

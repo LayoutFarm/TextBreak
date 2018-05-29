@@ -21,23 +21,6 @@ namespace Typography.TextBreak
         Text,
         Number,
         Punc
-    }
-
-    public struct SplitBound
-    {
-        public readonly int startIndex;
-        public readonly int length;
-        public SplitBound(int startIndex, int length)
-        {
-            this.startIndex = startIndex;
-            this.length = length;
-        }
-#if DEBUG
-        public override string ToString()
-        {
-            return startIndex + ":" + length;
-        }
-#endif
-    }
+    } 
 
 }
