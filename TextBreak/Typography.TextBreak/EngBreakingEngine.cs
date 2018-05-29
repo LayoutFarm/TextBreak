@@ -58,7 +58,9 @@ namespace Typography.TextBreak
                     {
                         //some remaining data
                         breakBounds.length = i - breakBounds.startIndex;
+                        //
                         onBreak(breakBounds);
+                        //
                     }
 
                     visitor.State = VisitorState.OutOfRangeChar;
@@ -80,7 +82,9 @@ namespace Typography.TextBreak
                                         breakBounds.startIndex = i;
                                         breakBounds.length = 2;
                                         breakBounds.kind = WorkKind.NewLine;
+                                        //
                                         onBreak(breakBounds);
+                                        //
                                         breakBounds.length = 0;
                                         lexState = LexState.Init;
 
@@ -101,7 +105,9 @@ namespace Typography.TextBreak
                                 breakBounds.startIndex = i;
                                 breakBounds.length = 1;
                                 breakBounds.kind = WorkKind.NewLine;
+                                //
                                 onBreak(breakBounds);
+                                //
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 continue;
@@ -150,6 +156,7 @@ namespace Typography.TextBreak
 
                                 //we not collect punc
                                 onBreak(breakBounds);
+                                //
                                 breakBounds.startIndex += 1;
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
@@ -171,7 +178,9 @@ namespace Typography.TextBreak
 
                                 //flush current state 
                                 breakBounds.length = i - breakBounds.startIndex;
+                                //
                                 onBreak(breakBounds);
+                                //
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 goto case LexState.Init;
@@ -184,7 +193,9 @@ namespace Typography.TextBreak
                             {
                                 //flush
                                 breakBounds.length = i - breakBounds.startIndex;
+                                //
                                 onBreak(breakBounds);
+                                //
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 goto case LexState.Init;
@@ -196,7 +207,9 @@ namespace Typography.TextBreak
                             if (!char.IsWhiteSpace(c))
                             {
                                 breakBounds.length = i - breakBounds.startIndex;
+                                //
                                 onBreak(breakBounds);
+                                //
                                 breakBounds.length = 0;
                                 lexState = LexState.Init;
                                 goto case LexState.Init;
@@ -212,7 +225,9 @@ namespace Typography.TextBreak
             {
                 //some remaining data
                 breakBounds.length = (start + len) - breakBounds.startIndex;
+                //
                 onBreak(breakBounds);
+                //
             }
             visitor.State = VisitorState.End;
         }
