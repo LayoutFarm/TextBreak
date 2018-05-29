@@ -3,17 +3,18 @@
 
 namespace Typography.TextBreak
 {
-     
-    public delegate void OnBreak(BreakBounds breakBounds);
 
-    public class BreakBounds
+    delegate void OnBreak(BreakBounds breakBounds);
+
+    class BreakBounds
     {
         public int startIndex;
         public int length;
         public bool stopNext;
         public WorkKind kind;
     }
-    public enum WorkKind : byte
+
+    enum WorkKind : byte
     {
         Whitespace,
         NewLine,
