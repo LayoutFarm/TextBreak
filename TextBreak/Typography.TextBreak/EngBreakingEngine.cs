@@ -165,7 +165,7 @@ namespace Typography.TextBreak
                     case LexState.Number:
                         {
                             //in number state
-                            if (!char.IsNumber(c))
+                            if (!char.IsNumber(c) && c != '.')
                             {
                                 //if number then continue collect
                                 //if not
