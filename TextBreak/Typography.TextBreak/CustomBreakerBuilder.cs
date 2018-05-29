@@ -3,6 +3,8 @@
 // © 2016 and later: Unicode, Inc. and others.
 // License & terms of use: http://www.unicode.org/copyright.html#License
 
+using System.IO;
+using System.Collections.Generic;
 
 namespace Typography.TextBreak
 {
@@ -20,7 +22,7 @@ namespace Typography.TextBreak
                 thaiDicBreakingEngine = new ThaiDictionaryBreakingEngine();
                 thaiDicBreakingEngine.SetDictionaryData(customDic);//add customdic to the breaker
                 customDic.SetCharRange(thaiDicBreakingEngine.FirstUnicodeChar, thaiDicBreakingEngine.LastUnicodeChar);
-                customDic.LoadFromTextfile(DataDir + "/thaidict.txt"); 
+                customDic.LoadSortedUniqueWordList(GetTextListIterFromTextFile(DataDir + "/thaidict.txt"));
             }
             if (laoDicBreakingEngine == null)
             {
@@ -28,7 +30,7 @@ namespace Typography.TextBreak
                 laoDicBreakingEngine = new LaoDictionaryBreakingEngine();
                 laoDicBreakingEngine.SetDictionaryData(customDic);//add customdic to the breaker
                 customDic.SetCharRange(laoDicBreakingEngine.FirstUnicodeChar, laoDicBreakingEngine.LastUnicodeChar);
-                customDic.LoadFromTextfile(DataDir + "/laodict.txt");
+                customDic.LoadSortedUniqueWordList(GetTextListIterFromTextFile(DataDir + "/laodict.txt"));
             }
         }
 
@@ -57,6 +59,28 @@ namespace Typography.TextBreak
             breaker.AddBreakingEngine(thaiDicBreakingEngine);
             breaker.AddBreakingEngine(laoDicBreakingEngine);
             return breaker;
+        }
+
+
+        static IEnumerable<string> GetTextListIterFromTextFile(string filename)
+        {
+            //read from original ICU's dictionary
+            //..
+
+            using (FileStream fs = new FileStream(filename, FileMode.Open))
+            using (StreamReader reader = new StreamReader(fs))
+            {
+                string line = reader.ReadLine();
+                while (line != null)
+                {
+                    line = line.Trim();
+                    if (line.Length > 0 && (line[0] != '#')) //not a comment
+                    {
+                        yield return line.Trim();
+                    }
+                    line = reader.ReadLine();//next line
+                }
+            }
         }
     }
 }
