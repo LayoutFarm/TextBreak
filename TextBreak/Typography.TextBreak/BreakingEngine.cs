@@ -32,7 +32,7 @@ namespace Typography.TextBreak
         int _len;
         int _endAt;
 
-        protected bool NotMergeLastIncompleteWord { get; set; }
+        public bool DontMergeLastIncompleteWord { get; set; }
         internal override void BreakWord(WordVisitor visitor, char[] charBuff, int startAt, int len)
         {
             visitor.State = VisitorState.Parsing;
@@ -119,7 +119,7 @@ namespace Typography.TextBreak
                                 }
                                 else
                                 {
-                                    if (!NotMergeLastIncompleteWord)
+                                    if (!DontMergeLastIncompleteWord)
                                     {
                                         latest_candidate_isNotWord = true;//word may has error
                                         candidateBreakList.Push(candidateLen);
