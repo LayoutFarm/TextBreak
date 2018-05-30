@@ -58,9 +58,12 @@ namespace Typography.TextBreak
                     {
                         //some remaining data
                         breakBounds.length = i - breakBounds.startIndex;
-                        //
-                        onBreak(breakBounds);
-                        //
+                        if (breakBounds.length > 0)
+                        {
+                            //
+                            onBreak(breakBounds);
+                            //
+                        }
                     }
 
                     visitor.State = VisitorState.OutOfRangeChar;
